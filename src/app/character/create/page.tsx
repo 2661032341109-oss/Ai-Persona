@@ -25,12 +25,9 @@ import {
 } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { addCharacter } from '@/lib/characters';
-import { ArrowLeft, Bot, ImageIcon, Loader2, Sparkles, Wand2, X, PlusCircle, Trash2, UploadCloud, Flag, Shield, Eye, Tv, BookText, Gamepad2, Columns3, Rabbit, Smile, Mic, Star, Dumbbell, Handshake, Speech, History, SquarePlay, TvMinimal, Sticker, Globe, PocketKnife, CodeXml, Wrench, Stethoscope, School, Palette, ChefHat, Plane, Camera, Music2, Swords, BookHeart, Users, Crown, Skull, GraduationCap, ArrowUp, ArrowDown, HeartCrack, MessageCircleHeart, Footprints, WandSparkles, House, User, Cherry, Grape, Rocket, Clapperboard } from 'lucide-react';
+import { ArrowLeft, Bot, ImageIcon, Loader2, Sparkles, Wand2, X, PlusCircle, Trash2, UploadCloud, Flag, Shield, Eye, Tv, BookText, Gamepad2, Columns3, Rabbit, Smile, Mic, Star, Dumbbell, Handshake, Speech, History, SquarePlay, TvMinimal, Sticker, Globe, PocketKnife, CodeXml, Wrench, Stethoscope, School, Palette, ChefHat, Plane, Camera, Music2, Swords, BookHeart, Users, Crown, Skull, GraduationCap, ArrowUp, ArrowDown, HeartCrack, MessageCircleHeart, Footprints, WandSparkles, House, User, Cherry, Grape, Rocket, Clapperboard, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import Image from 'next/image';
 import {
   Popover,
   PopoverContent,
@@ -43,15 +40,15 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
 } from '@/components/ui/command';
-
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react';
 import React from 'react';
 import { generateCharacterDetails } from '@/ai/flows/generate-character-details';
 import { generateImage } from '@/ai/flows/generate-image';
-import type { GenerateCharacterDetailsInput, GenerateImageInput } from '@/ai/schemas';
+import { generateCharacterFromDraft } from '@/ai/flows/generate-character-from-draft';
+import type { GenerateCharacterDetailsInput, GenerateImageInput, GenerateCharacterFromDraftInput } from '@/ai/schemas';
 
 const tagsConfig = {
   'ระดับเนื้อหา': [
@@ -72,8 +69,8 @@ const tagsConfig = {
     { name: 'ตัวละครมีม', icon: Smile },
     { name: 'ออริจินอล', icon: Bot },
   ],
-   'บทบาท': ['นักแสดง', 'นักร้อง', 'ไอดอล', 'นักกีฬา', 'นักธุรกิจ', 'นักการเมือง', 'บุคคลสำคัญในประวัติศาสตร์', 'ยูทูบเบอร์', 'สตรีมเมอร์', 'วีทูบเบอร์', 'อินฟลูเอนเซอร์เสมือน', 'มาเฟีย', 'ระบบ', 'วิศวะ', 'พ่อหมอ', 'หมอ', 'ครู', 'ศิลปิน', 'เชฟ', 'นักบิน', 'ช่างภาพ', 'นักดนตรี', 'โปรแกรมเมอร์', 'บอดี้การ์ด', 'หุ่นยนต์', 'นักวิทยาศาสตร์', 'นักสืบ', 'ตำรวจ', 'อัศวิน', 'นักบวช', 'แม่ชี', 'พ่อบ้าน', 'เทพเจ้า', 'คนไข้', 'พยาบาล', 'นักบุญ', 'ตัวร้าย', 'ฮีโร่', 'ขุนนาง', 'นักศึกษา', 'จักพรรดื', 'พระมเหสี', 'พระสนม', 'รัชทายาท'],
-  'บุคลิกและลักษณะนิสัย': ['โรแมนติก', 'อ่อนโยน', 'ตลก', 'สยองขวัญ', 'ระทึกขวัญ', 'ดราม่า', 'ลึกลับ', 'ซึนเดเระ', 'คุเดเระ', 'ฉลาด', 'ขี้อาย', 'จริงจัง', 'ร่าเริง', 'ซุ่มซ่าม', 'แฟนออกสาว', 'หมาโกลเด้น', 'แมวดำ', 'อีนิกม่า', 'อัลฟ่า', 'เบต้า', 'โอเมก้า', 'เนิร์ด', 'หมาเด็ก', 'หมาแก่', 'ซามอยด์', 'เจ้าเล่ห์'],
+   'บทบาท': ['นักแสดง', 'นักร้อง', 'ไอดอล', 'นักกีฬา', 'นักธุรกิจ', 'นักการเมือง', 'บุคคลสำคัญในประวัติศาสตร์', 'ยูทูบเบอร์', 'สตรีมเมอร์', 'วีทูบเบอร์', 'อินฟลูเอนเซอร์เสมือน', 'มาเฟีย', 'ระบบ', 'วิศวะ', 'พ่อหมอ', 'หมอ', 'ครู', 'ศิลปิน', 'เชฟ', 'นักบิน', 'ช่างภาพ', 'นักดนตรี', 'โปรแกรมเมอร์', 'บอดี้การ์ด', 'หุ่นยนต์', 'นักวิทยาศาสตร์', 'นักสืบ', 'ตำรวจ', 'อัศวิน', 'นักบวช', 'แม่ชี', 'พ่อบ้าน', 'เทพเจ้า', 'คนไข้', 'พยาบาล', 'นักบุญ', 'ตัวร้าย', 'ฮีโร่', 'ขุนนาง', 'นักศึกษา', 'จักรพรรดิ', 'พระมเหสี', 'พระสนม', 'รัชทายาท'],
+  'บุคลิกและลักษณะนิสัย': ['โรแมนติก', 'อ่อนโยน', 'ตลก', 'สยองขวัญ', 'ระทึกขวัญ', 'ดราม่า', 'ลึกลับ', 'ซึนเดเระ', 'คูเดเระ', 'ฉลาด', 'ขี้อาย', 'จริงจัง', 'ร่าเริง', 'ซุ่มซ่าม', 'แฟนออกสาว', 'หมาโกลเด้น', 'แมวดำ', 'อีนิกม่า', 'อัลฟ่า', 'เบต้า', 'โอเมก้า', 'เนิร์ด', 'หมาเด็ก', 'หมาแก่', 'ซามอยด์', 'เจ้าเล่ห์'],
   'ประเภท/องค์ประกอบเรื่อง': ['ไทยโบราณ', 'ผจญภัย', 'แฟนตาซี', 'แอคชัน', 'ชีวิตประจำวัน', 'ยุคกลาง', 'ข้ามมิติ', 'เกิดใหม่', 'ไซไฟ', 'หลังวันสิ้นโลก', 'จีนย้อนยุค'],
   'เพศและความสัมพันธ์': ['แฟน', 'แต่งงาน', 'ยาโอย', 'ยูริ', 'ชายหญิง', 'ชาย', 'หญิง', 'ไบเซ็กชวล', 'ฟูตะ', 'เฟมบอย', 'แฟนเก่า', 'คนที่ชอบ', 'เคะ', 'เมะ'],
   'ความสัมพันธ์': ['เพื่อน', 'เพื่อนร่วมห้อง', 'เพื่อนสนิท', 'น้องสาว', 'พี่ชาย', 'แม่', 'พ่อ', 'ลูกสาว', 'ลูกชาย'],
@@ -89,14 +86,9 @@ const formSchema = z.object({
   description: z.string().min(1, 'กรุณากรอกคำอธิบาย').max(4096, 'คำอธิบายต้องไม่เกิน 4096 ตัวอักษร'),
   greeting: z.string().min(1, 'กรุณากรอกคำทักทาย').max(2048, 'คำทักทายต้องไม่เกิน 2048 ตัวอักษร'),
   history: z.string().max(4096, 'ประวัติตัวละครต้องไม่เกิน 4096 ตัวอักษร').optional(),
-  defaultUserRoleName: z.string().max(40, 'ชื่อบทบาทผู้ใช้ต้องไม่เกิน 40 ตัวอักษร').optional(),
-  defaultUserRoleDescription: z.string().max(2048, 'รายละเอียดบทบาทผู้ใช้ต้องไม่เกิน 2048 ตัวอักษร').optional(),
-  defaultScenarioName: z.string().max(40, 'ชื่อสถานการณ์ต้องไม่เกิน 40 ตัวอักษร').optional(),
-  defaultScenarioDescription: z.string().max(2048, 'รายละเอียดสถานการณ์ต้องไม่เกิน 2048 ตัวอักษร').optional(),
   visibility: z.enum(['public', 'private']).default('public'),
   tags: z.array(z.string()).optional(),
   avatarUrl: z.string().optional(),
-  profileImageOptions: z.array(z.string()).optional(),
 });
 
 export default function CreateCharacterPage() {
@@ -104,9 +96,10 @@ export default function CreateCharacterPage() {
   const { toast } = useToast();
   const [selectedTags, setSelectedTags] = React.useState<string[]>(['ออริจินอล']);
   const [isGeneratingCharacter, setIsGeneratingCharacter] = React.useState(false);
+  const [isGeneratingFromDraft, setIsGeneratingFromDraft] = React.useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = React.useState(false);
   const [avatarPreview, setAvatarPreview] = React.useState<string | null>(null);
-
+  const [draft, setDraft] = React.useState('');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -117,12 +110,7 @@ export default function CreateCharacterPage() {
       greeting: '',
       history: '',
       visibility: 'public',
-      defaultUserRoleName: '',
-      defaultUserRoleDescription: '',
-      defaultScenarioName: '',
-      defaultScenarioDescription: '',
       tags: ['ออริจินอล'],
-      profileImageOptions: [],
     },
   });
   
@@ -160,6 +148,40 @@ export default function CreateCharacterPage() {
       });
     } finally {
       setIsGeneratingCharacter(false);
+    }
+  };
+
+  const handleGenerateFromDraft = async () => {
+    if (!draft.trim()) {
+      toast({
+        variant: 'destructive',
+        title: 'ข้อมูลไม่ครบถ้วน',
+        description: 'กรุณาใส่บทสรุปหรือข้อมูลร่างของตัวละคร',
+      });
+      return;
+    }
+    setIsGeneratingFromDraft(true);
+    try {
+      const input: GenerateCharacterFromDraftInput = { draft };
+      const result = await generateCharacterFromDraft(input);
+      form.setValue('name', result.name);
+      form.setValue('tagline', result.tagline);
+      form.setValue('description', result.personality);
+      form.setValue('greeting', result.greeting);
+      setSelectedTags(result.tags);
+      toast({
+        title: 'สร้างตัวละครจากบทสรุปสำเร็จ!',
+        description: 'AI ได้กรอกข้อมูลจากบทสรุปของคุณแล้ว',
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        title: 'เกิดข้อผิดพลาด',
+        description: 'ไม่สามารถสร้างตัวละครจากบทสรุปได้ โปรดลองอีกครั้ง',
+      });
+    } finally {
+      setIsGeneratingFromDraft(false);
     }
   };
 
@@ -206,14 +228,14 @@ export default function CreateCharacterPage() {
     addCharacter(newCharacter);
     
     toast({
-      title: 'สร้างตัวละครแล้ว!',
-      description: `${values.name} ได้ถูกสร้างขึ้นแล้ว`,
+      title: 'สร้างตัวละครสำเร็จ!',
+      description: `${values.name} ของคุณถูกสร้างขึ้นเรียบร้อยแล้ว`,
     });
     router.push('/');
   }
 
   return (
-    <div className="container mx-auto max-w-5xl px-4 py-8 bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 font-sans">
+    <div className="container mx-auto max-w-5xl px-4 py-8 bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50 font-sans">
       <div className="flex justify-between items-center mb-6">
         <Button variant="ghost" size="sm" asChild>
             <Link href="/">
@@ -221,57 +243,76 @@ export default function CreateCharacterPage() {
                 กลับหน้าหลัก
             </Link>
         </Button>
-        <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-center my-8 bg-clip-text text-transparent bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500">
+        <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-center my-8 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500">
             สร้างตัวละคร
         </h1>
-        <div className="flex gap-2">
-            <Button variant="outline" className="border-purple-200 text-purple-600 hover:bg-purple-100">บันทึกแบบร่าง</Button>
-            <Button variant="secondary" className="bg-purple-100 text-purple-700 hover:bg-purple-200">ประวัติแบบร่าง</Button>
-        </div>
+        <div></div>
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1 space-y-8">
-              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white/80 backdrop-blur-sm border-purple-200/50 rounded-2xl">
+              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white/80 backdrop-blur-sm border-rose-200/50 rounded-2xl">
                   <CardHeader>
-                      <CardTitle className="text-purple-800">รูปโปรไฟล์</CardTitle>
-                      <CardDescription>
-                          <Link href="#" className="text-purple-600 hover:text-purple-800 underline text-sm">ข้อกำหนดการสร้าง</Link>
-                      </CardDescription>
+                      <CardTitle className="text-rose-800">รูปโปรไฟล์</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                      <div className="aspect-square w-full rounded-2xl bg-purple-50/50 flex items-center justify-center overflow-hidden border-2 border-dashed border-purple-200">
+                      <div className="aspect-square w-full rounded-2xl bg-rose-50/50 flex items-center justify-center overflow-hidden border-2 border-dashed border-rose-200">
                         {isGeneratingImage ? (
-                          <div className="flex flex-col items-center gap-2 text-purple-600">
-                            <Loader2 className="w-10 h-10 animate-spin text-purple-500"/>
+                          <div className="flex flex-col items-center gap-2 text-rose-600">
+                            <Loader2 className="w-10 h-10 animate-spin text-rose-500"/>
                             <p>กำลังสร้างรูปภาพ...</p>
                           </div>
                         ) : avatarPreview ? (
                            <Image src={avatarPreview} alt="Generated Avatar" width={400} height={400} className="object-cover w-full h-full" />
                         ) : (
-                           <div className="text-center text-purple-400 p-4 flex flex-col items-center justify-center">
-                            <ImageIcon className="w-16 h-16 mx-auto mb-4 text-purple-200" />
+                           <div className="text-center text-rose-400 p-4 flex flex-col items-center justify-center">
+                            <ImageIcon className="w-16 h-16 mx-auto mb-4 text-rose-200" />
                             <p className="text-sm">รูปภาพจะแสดงที่นี่</p>
                           </div>
                         )}
                       </div>
-                      <Button type="button" onClick={handleGenerateCharacter} disabled={isGeneratingCharacter || isGeneratingImage} className="w-full bg-gradient-to-r from-blue-500 to-teal-400 text-white font-bold shadow-md hover:scale-105 transition-transform rounded-xl py-3">
-                        {isGeneratingCharacter ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                        <span>AI ช่วยสร้างข้อมูล (ฟรี)</span>
-                      </Button>
-                      <Button type="button" onClick={handleGenerateImage} disabled={isGeneratingCharacter || isGeneratingImage} className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold shadow-md hover:scale-105 transition-transform rounded-xl py-3">
+                      <Button type="button" onClick={handleGenerateImage} disabled={isGeneratingCharacter || isGeneratingImage || isGeneratingFromDraft} className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold shadow-md hover:scale-105 transition-transform rounded-xl py-3">
                         {isGeneratingImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                         <span>AI สร้างรูปภาพ (ฟรี)</span>
                       </Button>
                   </CardContent>
               </Card>
+
+               <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white/80 backdrop-blur-sm border-amber-200/50 rounded-2xl">
+                <CardHeader>
+                  <CardTitle className="text-amber-800 flex items-center gap-2">
+                    <FileText />
+                    สร้างจากบทสรุป
+                  </CardTitle>
+                  <CardDescription>
+                    วางบทสรุปหรือข้อมูลร่างของตัวละคร แล้วให้ AI ช่วยกรอกข้อมูลโดยอัตโนมัติ
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Textarea
+                    placeholder="วางบทสรุปตัวละครของคุณที่นี่..."
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    rows={8}
+                    className="focus:ring-amber-500 focus:border-amber-500 transition-all duration-300 rounded-lg border-amber-200/80"
+                  />
+                  <Button type="button" onClick={handleGenerateFromDraft} disabled={isGeneratingCharacter || isGeneratingImage || isGeneratingFromDraft} className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-bold shadow-md hover:scale-105 transition-transform rounded-xl py-3">
+                    {isGeneratingFromDraft ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                    <span>AI ช่วยกรอกข้อมูล (ฟรี)</span>
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
 
             <div className="lg:col-span-2 space-y-8">
-              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white/80 backdrop-blur-sm border-purple-200/50 rounded-2xl">
-                  <CardHeader>
-                      <CardTitle className="text-purple-800">ข้อมูลพื้นฐาน</CardTitle>
+              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white/80 backdrop-blur-sm border-rose-200/50 rounded-2xl">
+                  <CardHeader className="flex flex-row items-center justify-between">
+                      <CardTitle className="text-rose-800">ข้อมูลพื้นฐาน</CardTitle>
+                      <Button type="button" variant="ghost" onClick={handleGenerateCharacter} disabled={isGeneratingCharacter || isGeneratingImage || isGeneratingFromDraft}>
+                          {isGeneratingCharacter ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                          AI ช่วยเขียน
+                      </Button>
                   </CardHeader>
                   <CardContent className="space-y-6">
                       <FormField
@@ -281,7 +322,7 @@ export default function CreateCharacterPage() {
                           <FormItem>
                               <FormLabel>ชื่อตัวละคร *</FormLabel>
                               <FormControl>
-                              <Input placeholder="e.g. อัลเบิร์ต ไอน์สไตน์" {...field} maxLength={40} className="focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 rounded-lg border-purple-200/80"/>
+                              <Input placeholder="e.g. เอมิลี่" {...field} maxLength={40} className="focus:ring-rose-500 focus:border-rose-500 transition-all duration-300 rounded-lg border-rose-200/80"/>
                               </FormControl>
                               <FormDescription className='flex justify-end text-xs text-muted-foreground pr-2'>{field.value.length}/40</FormDescription>
                               <FormMessage />
@@ -294,9 +335,9 @@ export default function CreateCharacterPage() {
                           name="tagline"
                           render={({ field }) => (
                           <FormItem>
-                              <FormLabel>คำโปรย * (สำหรับแสดงผลบนหน้าตัวละคร เป็นข้อมูลให้ AI)</FormLabel>
+                              <FormLabel>คำโปรย *</FormLabel>
                               <FormControl>
-                              <Textarea placeholder="e.g. อัจฉริยะผู้ปฏิวัติวงการฟิสิกส์" {...field} maxLength={100} className="focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 rounded-lg border-purple-200/80"/>
+                              <Textarea placeholder="e.g. เพื่อนร่วมห้องคนใหม่ที่เข้ามาป่วนหัวใจ" {...field} maxLength={100} className="focus:ring-rose-500 focus:border-rose-500 transition-all duration-300 rounded-lg border-rose-200/80"/>
                               </FormControl>
                               <FormDescription className='flex justify-end text-xs text-muted-foreground pr-2'>{field.value.length}/100</FormDescription>
                               <FormMessage />
@@ -313,10 +354,10 @@ export default function CreateCharacterPage() {
                             <Popover>
                               <PopoverTrigger asChild>
                                 <FormControl>
-                                  <Button variant="outline" className="w-full justify-start font-normal h-auto flex-wrap hover:border-purple-300 transition-colors rounded-lg border-purple-200/80 min-h-[40px]">
+                                  <Button variant="outline" className="w-full justify-start font-normal h-auto flex-wrap hover:border-rose-300 transition-colors rounded-lg border-rose-200/80 min-h-[40px]">
                                     {selectedTags.length > 0 ? (
                                       selectedTags.map(tag => (
-                                        <Badge key={tag} variant="secondary" className="m-1 text-sm bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200">
+                                        <Badge key={tag} variant="secondary" className="m-1 text-sm bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
                                           {tag}
                                           <span
                                             role="button"
@@ -337,9 +378,9 @@ export default function CreateCharacterPage() {
                                   </Button>
                                 </FormControl>
                               </PopoverTrigger>
-                              <PopoverContent className="w-[400px] p-0 rounded-xl shadow-2xl border-purple-200">
+                              <PopoverContent className="w-[400px] p-0 rounded-xl shadow-2xl border-rose-200">
                                 <Command>
-                                  <CommandInput placeholder="ค้นหาแท็ก..." className="focus:ring-purple-500" />
+                                  <CommandInput placeholder="ค้นหาแท็ก..." className="focus:ring-rose-500" />
                                   <CommandList>
                                     <CommandEmpty>ไม่พบแท็ก</CommandEmpty>
                                      {Object.entries(tagsConfig).map(([group, tags]) => (
@@ -357,7 +398,7 @@ export default function CreateCharacterPage() {
                                                   setSelectedTags(prev => [...prev, tagName]);
                                                 }
                                               }}
-                                              className="cursor-pointer hover:bg-purple-50 aria-selected:bg-purple-100 aria-selected:text-purple-900"
+                                              className="cursor-pointer hover:bg-rose-50 aria-selected:bg-rose-100 aria-selected:text-rose-900"
                                             >
                                               <div
                                                 className={cn(
@@ -392,9 +433,9 @@ export default function CreateCharacterPage() {
                           name="description"
                           render={({ field }) => (
                           <FormItem>
-                              <FormLabel>คำอธิบาย * (ไม่แสดงผลบนหน้าตัวละคร เป็นข้อมูลให้ AI)</FormLabel>
+                              <FormLabel>คำอธิบาย * (ข้อมูลสำหรับ AI)</FormLabel>
                               <FormControl>
-                              <Textarea placeholder="e.g. ฉันเป็นนักฟิสิกส์ มีบุคลิกใจดี ชอบอธิบายแนวคิดซับซ้อนให้เข้าใจง่าย ฉันมีความสนใจในวิทยาศาสตร์ จักรวาล และดนตรีคลาสสิก" {...field} rows={6} maxLength={4096} className="focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 rounded-lg border-purple-200/80"/>
+                              <Textarea placeholder="e.g. เอมิลี่เป็นนักศึกษาสาวชาวอเมริกันที่ร่าเริงและชอบหยอกล้อ เธอมีความมั่นใจและตรงไปตรงมา..." {...field} rows={6} maxLength={4096} className="focus:ring-rose-500 focus:border-rose-500 transition-all duration-300 rounded-lg border-rose-200/80"/>
                               </FormControl>
                               <FormDescription className='flex justify-end text-xs text-muted-foreground pr-2'>{field.value.length}/4096</FormDescription>
                               <FormMessage />
@@ -409,7 +450,7 @@ export default function CreateCharacterPage() {
                           <FormItem>
                               <FormLabel>คำทักทาย *</FormLabel>
                               <FormControl>
-                              <Textarea placeholder="e.g. สวัสดี ฉันคืออัลเบิร์ต ถามฉันเกี่ยวกับผลงานทางวิทยาศาสตร์ของฉันได้เลย" {...field} rows={4} maxLength={2048} className="focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 rounded-lg border-purple-200/80"/>
+                              <Textarea placeholder="e.g. เฮ้! ในที่สุดก็เจอตัวซะทีนะรูมเมท ว่าแต่...นาย/เธอชื่ออะไรนะ?" {...field} rows={4} maxLength={2048} className="focus:ring-rose-500 focus:border-rose-500 transition-all duration-300 rounded-lg border-rose-200/80"/>
                               </FormControl>
                               <FormDescription className='flex justify-end text-xs text-muted-foreground pr-2'>{field.value.length}/2048</FormDescription>
                               <FormMessage />
@@ -422,9 +463,9 @@ export default function CreateCharacterPage() {
                           name="history"
                           render={({ field }) => (
                           <FormItem>
-                              <FormLabel>ประวัติตัวละคร (สำหรับผู้ใช้ดูเท่านั้น ไม่ใช้เป็นข้อมูลให้ AI) (ไม่บังคับ)</FormLabel>
+                              <FormLabel>ประวัติตัวละคร (สำหรับผู้ใช้ดูเท่านั้น, ไม่บังคับ)</FormLabel>
                               <FormControl>
-                              <Textarea placeholder="e.g. อัลเบิร์ตเกิดในเยอรมนีเมื่อปี 1879 ได้รับรางวัลโนเบลจากการค้นพบปรากฏการณ์โฟโตอิเล็กทริก" {...field} rows={6} maxLength={4096} className="focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 rounded-lg border-purple-200/80"/>
+                              <Textarea placeholder="e.g. เอมิลี่มาจากเมืองเล็กๆ ในรัฐแคลิฟอร์เนีย เธอได้รับทุนการศึกษาเพื่อมาเรียนที่ประเทศไทย..." {...field} rows={6} maxLength={4096} className="focus:ring-rose-500 focus:border-rose-500 transition-all duration-300 rounded-lg border-rose-200/80"/>
                               </FormControl>
                               <FormDescription className='flex justify-end text-xs text-muted-foreground pr-2'>{field.value?.length || 0}/4096</FormDescription>
                               <FormMessage />
@@ -434,9 +475,9 @@ export default function CreateCharacterPage() {
                   </CardContent>
               </Card>
 
-              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white/80 backdrop-blur-sm border-purple-200/50 rounded-2xl">
+              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white/80 backdrop-blur-sm border-rose-200/50 rounded-2xl">
                   <CardHeader>
-                      <CardTitle className="text-purple-800">การมองเห็น *</CardTitle>
+                      <CardTitle className="text-rose-800">การมองเห็น *</CardTitle>
                   </CardHeader>
                   <CardContent>
                       <FormField
@@ -455,7 +496,7 @@ export default function CreateCharacterPage() {
                                       <RadioGroupItem value="public" />
                                   </FormControl>
                                   <FormLabel className="font-normal">
-                                      สาธารณะ
+                                      สาธารณะ (ทุกคนมองเห็นและแชทได้)
                                   </FormLabel>
                                   </FormItem>
                                   <FormItem className="flex items-center space-x-3 space-y-0">
@@ -463,7 +504,7 @@ export default function CreateCharacterPage() {
                                       <RadioGroupItem value="private" />
                                   </FormControl>
                                   <FormLabel className="font-normal">
-                                      ส่วนตัว
+                                      ส่วนตัว (คุณเท่านั้นที่มองเห็น)
                                   </FormLabel>
                                   </FormItem>
                               </RadioGroup>
@@ -491,5 +532,3 @@ export default function CreateCharacterPage() {
     </div>
   );
 }
-
-    
