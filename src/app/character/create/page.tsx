@@ -24,6 +24,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { addCharacter } from '@/lib/characters';
 import { ArrowLeft, Bot, ImageIcon, Loader2, Sparkles, Wand2, X, PlusCircle, Trash2, UploadCloud, Flag, Shield, Eye, Tv, BookText, Gamepad2, Columns3, Rabbit, Smile, Mic, Star, Dumbbell, Handshake, Speech, History, SquarePlay, TvMinimal, Sticker, Globe, PocketKnife, CodeXml, Wrench, Stethoscope, School, Palette, ChefHat, Plane, Camera, Music2, Swords, BookHeart, Users, Crown, Skull, GraduationCap, ArrowUp, ArrowDown, HeartCrack, MessageCircleHeart, Footprints, WandSparkles, House, User, Cherry, Grape, Rocket, Clapperboard, FileText, PersonStanding, HandHeart, Laugh, Ghost, Frown, CircleHelp, Omega, Glasses, Dog, ScrollText, Bird, Flame, Zap, Mountain, Bug, Ellipsis } from 'lucide-react';
@@ -51,6 +60,8 @@ import { generateCharacterDetails } from '@/ai/flows/generate-character-details'
 import { generateCharacterFromDraft } from '@/ai/flows/generate-character-from-draft';
 import type { GenerateCharacterDetailsInput, GenerateCharacterFromDraftInput } from '@/ai/schemas';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+
 
 const tagsConfig = {
   'ระดับเนื้อหา': [
@@ -98,6 +109,8 @@ export default function CreateCharacterPage() {
   const { toast } = useToast();
   const [selectedTags, setSelectedTags] = React.useState<string[]>(['ออริจินอล']);
   const [isGeneratingCharacter, setIsGeneratingCharacter] = React.useState(false);
+  const [isAiHelperOpen, setIsAiHelperOpen] = React.useState(false);
+  const [aiHelperPrompt, setAiHelperPrompt] = React.useState('');
   const [isGeneratingFromDraft, setIsGeneratingFromDraft] = React.useState(false);
   const [avatarPreview, setAvatarPreview] = React.useState<string | null>(null);
   const [draft, setDraft] = React.useState('');
@@ -132,19 +145,17 @@ export default function CreateCharacterPage() {
   }, [form]);
 
   const handleGenerateCharacter = async () => {
+    if (!aiHelperPrompt.trim()) {
+      toast({
+        variant: 'destructive',
+        title: 'ข้อมูลไม่ครบถ้วน',
+        description: 'กรุณาใส่คำอธิบายภาพรวมของตัวละคร',
+      });
+      return;
+    }
     setIsGeneratingCharacter(true);
     try {
-      const currentValues = form.getValues();
-      const input: GenerateCharacterDetailsInput = {
-        prompt: `
-        สร้างตัวละครที่มีข้อมูลต่อไปนี้:
-        ชื่อตัวละคร: ${currentValues.name || 'สุ่ม'}
-        คำโปรย: ${currentValues.tagline || 'สุ่ม'}
-        ลักษณะนิสัย: ${currentValues.description || 'สุ่ม'}
-        คำทักทาย: ${currentValues.greeting || 'สุ่ม'}
-        แท็ก: ${selectedTags.join(', ')}
-        กรุณาสร้างข้อมูลทั้งหมดเป็นภาษาไทย
-      `};
+      const input: GenerateCharacterDetailsInput = { prompt: aiHelperPrompt };
       const result = await generateCharacterDetails(input);
       form.setValue('name', result.name);
       form.setValue('tagline', result.tagline);
@@ -154,6 +165,8 @@ export default function CreateCharacterPage() {
         title: 'สร้างข้อมูลตัวละครสำเร็จ!',
         description: 'AI ได้ช่วยคุณสร้างข้อมูลพื้นฐานของตัวละครแล้ว',
       });
+      setIsAiHelperOpen(false); // Close the dialog on success
+      setAiHelperPrompt(''); // Clear prompt
     } catch (error) {
       console.error(error);
       toast({
@@ -204,20 +217,10 @@ export default function CreateCharacterPage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     try {
-        await addCharacter({
-            name: values.name,
-            tagline: values.tagline,
-            description: values.description,
-            greeting: values.greeting,
-            history: values.history || '',
-            visibility: values.visibility,
-            tags: values.tags,
-            avatarUrl: values.avatarUrl,
-        });
-        
+        await addCharacter(values);
         toast({
-        title: 'สร้างตัวละครสำเร็จ!',
-        description: `${values.name} ของคุณถูกสร้างขึ้นเรียบร้อยแล้ว`,
+            title: 'สร้างตัวละครสำเร็จ!',
+            description: `${values.name} ของคุณถูกสร้างขึ้นเรียบร้อยแล้ว`,
         });
         router.push('/');
     } catch (error) {
@@ -311,10 +314,39 @@ export default function CreateCharacterPage() {
               <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white/80 backdrop-blur-sm border-rose-200/50 rounded-2xl">
                   <CardHeader className="flex flex-row items-center justify-between">
                       <CardTitle className="text-rose-800">ข้อมูลพื้นฐาน</CardTitle>
-                      <Button type="button" variant="ghost" onClick={handleGenerateCharacter} disabled={isGeneratingCharacter || isGeneratingFromDraft}>
-                          {isGeneratingCharacter ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                          AI ช่วยเขียน
-                      </Button>
+                      <Dialog open={isAiHelperOpen} onOpenChange={setIsAiHelperOpen}>
+                        <DialogTrigger asChild>
+                           <Button type="button" variant="ghost" disabled={isGeneratingCharacter || isGeneratingFromDraft}>
+                              <Sparkles className="mr-2 h-4 w-4" />
+                              AI ช่วยเขียน
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>AI ช่วยเขียน</DialogTitle>
+                            <DialogDescription>
+                              อธิบายภาพรวมของตัวละครที่คุณต้องการ แล้ว AI จะช่วยสร้างรายละเอียดที่เหลือให้
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4 py-4">
+                              <Label htmlFor="ai-prompt">คำอธิบายตัวละคร</Label>
+                              <Textarea 
+                                id="ai-prompt"
+                                placeholder="เช่น นักสืบหนุ่มจากยุควิคตอเรียนที่มีอดีตอันมืดมน"
+                                value={aiHelperPrompt}
+                                onChange={(e) => setAiHelperPrompt(e.target.value)}
+                                rows={4}
+                              />
+                          </div>
+                          <DialogFooter>
+                            <Button variant="ghost" onClick={() => setIsAiHelperOpen(false)}>ยกเลิก</Button>
+                            <Button type="button" onClick={handleGenerateCharacter} disabled={isGeneratingCharacter}>
+                              {isGeneratingCharacter ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                              สร้างข้อมูล
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                   </CardHeader>
                   <CardContent className="space-y-6">
                       <FormField
