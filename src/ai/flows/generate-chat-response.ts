@@ -32,7 +32,7 @@ CHARACTER DESCRIPTION (This defines your personality, background, and how you sh
 
 CONVERSATION HISTORY (The ongoing conversation between you and the user):
 {{#each conversationHistory}}
-{{#if (eq author 'user')}}
+{{#if (this.author === 'user')}}
 User: {{{text}}}
 {{else}}
 {{characterName}}: {{{text}}}
