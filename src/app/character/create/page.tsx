@@ -26,26 +26,24 @@ import {
 } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { addCharacter } from '@/lib/characters';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, PlusCircle, UploadCloud } from 'lucide-react';
 import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import Image from 'next/image';
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: 'ชื่อต้องมีอย่างน้อย 2 ตัวอักษร',
-  }),
-  description: z.string().min(10, {
-    message: 'คำอธิบายต้องมีอย่างน้อย 10 ตัวอักษร',
-  }),
-  personality: z.string().min(10, {
-    message: 'บุคลิกภาพต้องมีอย่างน้อย 10 ตัวอักษร',
-  }),
-  background: z.string().min(10, {
-    message: 'พื้นหลังต้องมีอย่างน้อย 10 ตัวอักษร',
-  }),
-  greeting: z.string().min(5, {
-    message: 'คำทักทายต้องมีอย่างน้อย 5 ตัวอักษร',
-  }),
-  avatarUrl: z.string().url({ message: 'กรุณาใส่ URL ที่ถูกต้อง' }).optional().or(z.literal('')),
+  name: z.string().min(1, 'กรุณากรอกชื่อตัวละคร').max(40, 'ชื่อตัวละครต้องไม่เกิน 40 ตัวอักษร'),
+  tagline: z.string().min(1, 'กรุณากรอกคำโปรย').max(100, 'คำโปรยต้องไม่เกิน 100 ตัวอักษร'),
+  description: z.string().min(1, 'กรุณากรอกคำอธิบาย').max(4096, 'คำอธิบายต้องไม่เกิน 4096 ตัวอักษร'),
+  greeting: z.string().min(1, 'กรุณากรอกคำทักทาย').max(2048, 'คำทักทายต้องไม่เกิน 2048 ตัวอักษร'),
+  history: z.string().max(4096, 'ประวัติตัวละครต้องไม่เกิน 4096 ตัวอักษร').optional(),
+  defaultUserRoleName: z.string().max(40, 'ชื่อบทบาทผู้ใช้ต้องไม่เกิน 40 ตัวอักษร').optional(),
+  defaultUserRoleDescription: z.string().max(2048, 'รายละเอียดบทบาทผู้ใช้ต้องไม่เกิน 2048 ตัวอักษร').optional(),
+  defaultScenarioName: z.string().max(40, 'ชื่อสถานการณ์ต้องไม่เกิน 40 ตัวอักษร').optional(),
+  defaultScenarioDescription: z.string().max(2048, 'รายละเอียดสถานการณ์ต้องไม่เกิน 2048 ตัวอักษร').optional(),
+  visibility: z.enum(['public', 'private']).default('public'),
 });
 
 export default function CreateCharacterPage() {
@@ -56,139 +54,189 @@ export default function CreateCharacterPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
+      tagline: '',
       description: '',
-      personality: '',
-      background: '',
       greeting: '',
-      avatarUrl: '',
+      history: '',
+      visibility: 'public',
+      defaultUserRoleName: '',
+      defaultUserRoleDescription: '',
+      defaultScenarioName: '',
+      defaultScenarioDescription: '',
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const newCharacter = {
-        ...values,
-        avatarUrl: values.avatarUrl || `https://picsum.photos/400/400?random=${Date.now()}`
+        name: values.name,
+        description: values.tagline, // Using tagline for description for now
+        personality: values.description, // Using description for personality
+        background: values.history || '',
+        greeting: values.greeting,
+        avatarUrl: `https://picsum.photos/400/400?random=${Date.now()}`
     }
     addCharacter(newCharacter);
     
     toast({
       title: 'สร้างตัวละครแล้ว!',
-      description: `${values.name} ได้เข้าร่วมบัญชีรายชื่อแล้ว`,
+      description: `${values.name} ได้ถูกสร้างขึ้นแล้ว`,
     });
     router.push('/');
   }
 
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-8">
-        <Button variant="ghost" asChild className="mb-4">
-            <Link href="/">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                กลับไปที่ตัวละคร
-            </Link>
-        </Button>
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-headline text-3xl">สร้างตัวละครใหม่</CardTitle>
-          <CardDescription>
-            ทำให้เพื่อนคู่ใจของคุณมีชีวิตขึ้นมา กำหนดตัวตน เรื่องราว และวิธีที่พวกเขาทักทายโลก
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>ชื่อ</FormLabel>
-                    <FormControl>
-                      <Input placeholder="เช่น อันยา จอมเวทย์แห่งแสงดาว" {...field} />
-                    </FormControl>
-                    <FormDescription>ชื่อเต็มหรือตำแหน่งของตัวละคร</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>คำอธิบายสั้น ๆ</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="สรุปสั้น ๆ หนึ่งประโยคเกี่ยวกับตัวละคร" {...field} />
-                    </FormControl>
-                    <FormDescription>ข้อความนี้จะปรากฏบนการ์ดตัวละคร</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="personality"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>บุคลิกภาพ</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="อธิบายลักษณะนิสัย ลักษณะเฉพาะ และท่าทางของพวกเขา" {...field} rows={4} />
-                    </FormControl>
-                     <FormDescription>พวกเขาประพฤติตนและมีปฏิสัมพันธ์อย่างไร?</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-               <FormField
-                control={form.control}
-                name="background"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>พื้นหลัง</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="เล่าเรื่องราวของพวกเขา พวกเขามาจากไหน? เหตุการณ์ใดที่หล่อหลอมพวกเขา?" {...field} rows={6}/>
-                    </FormControl>
-                    <FormDescription>ประวัติและเรื่องราวของตัวละคร</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-               <FormField
-                control={form.control}
-                name="greeting"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>คำทักทาย</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="ตัวละครแนะนำตัวเองครั้งแรกอย่างไร?" {...field} rows={3}/>
-                    </FormControl>
-                    <FormDescription>ข้อความแรกที่พวกเขาจะส่งในการแชทใหม่</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="avatarUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL รูปประจำตัว</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://example.com/image.png" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      ลิงก์ไปยังรูปภาพสำหรับภาพเหมือนของตัวละคร เว้นว่างไว้สำหรับรูปภาพแบบสุ่ม
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <CardFooter className="px-0 pt-6">
+    <div className="container mx-auto max-w-4xl px-4 py-8">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-3xl font-bold">สร้างตัวละคร</h1>
+        <div className="flex gap-2">
+            <Button variant="ghost">ยกเลิก</Button>
+            <Button variant="outline">บันทึกแบบร่าง</Button>
+        </div>
+      </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <Card>
+                <CardHeader>
+                    <CardTitle>รูปโปรไฟล์</CardTitle>
+                    <CardDescription>
+                        <Link href="#" className="text-primary underline">ข้อกำหนดการสร้างตัวละคร</Link>
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-8 text-center">
+                        <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                        <p className="mt-2 text-sm text-muted-foreground">คลิกเพื่ออัพโหลด</p>
+                    </div>
+                    <div className="space-y-2">
+                        <Button type="button" variant="outline" className="w-full">AI ช่วยสร้างตัวละคร (ฟรี)</Button>
+                        <Button type="button" variant="outline" className="w-full">AI สร้างรูปภาพ (ฟรี)</Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>ข้อมูลพื้นฐาน</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>ชื่อตัวละคร *</FormLabel>
+                            <FormControl>
+                            <Input placeholder="e.g. อัลเบิร์ต ไอน์สไตน์" {...field} maxLength={40} />
+                            </FormControl>
+                            <FormDescription className='flex justify-end'>{field.value.length}/40</FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="tagline"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>คำโปรย * (สำหรับแสดงผลบนหน้าตัวละคร เป็นข้อมูลให้ AI)</FormLabel>
+                            <FormControl>
+                            <Textarea placeholder="e.g. อัจฉริยะผู้ปฏิวัติวงการฟิสิกส์" {...field} maxLength={100} />
+                            </FormControl>
+                             <FormDescription className='flex justify-end'>{field.value.length}/100</FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>คำอธิบาย * (ไม่แสดงผลบนหน้าตัวละคร เป็นข้อมูลให้ AI)</FormLabel>
+                            <FormControl>
+                            <Textarea placeholder="e.g. ฉันเป็นนักฟิสิกส์ มีบุคลิกใจดี ชอบอธิบายแนวคิดซับซ้อนให้เข้าใจง่าย ฉันมีความสนใจในวิทยาศาสตร์ จักรวาล และดนตรีคลาสสิก" {...field} rows={6} maxLength={4096}/>
+                            </FormControl>
+                             <FormDescription className='flex justify-end'>{field.value.length}/4096</FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    
+                    <FormField
+                        control={form.control}
+                        name="greeting"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>คำทักทาย *</FormLabel>
+                            <FormControl>
+                            <Textarea placeholder="e.g. สวัสดี ฉันคืออัลเบิร์ต ถามฉันเกี่ยวกับผลงานทางวิทยาศาสตร์ของฉันได้เลย" {...field} rows={4} maxLength={2048}/>
+                            </FormControl>
+                             <FormDescription className='flex justify-end'>{field.value.length}/2048</FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+
+                     <FormField
+                        control={form.control}
+                        name="history"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>ประวัติตัวละคร (สำหรับผู้ใช้ดูเท่านั้น ไม่ใช้เป็นข้อมูลให้ AI) (ไม่บังคับ)</FormLabel>
+                            <FormControl>
+                            <Textarea placeholder="e.g. อัลเบิร์ตเกิดในเยอรมนีเมื่อปี 1879 ได้รับรางวัลโนเบลจากการค้นพบปรากฏการณ์โฟโตอิเล็กทริก" {...field} rows={6} maxLength={4096}/>
+                            </FormControl>
+                             <FormDescription className='flex justify-end'>{field.value?.length || 0}/4096</FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                </CardContent>
+            </Card>
+
+            <Card>
+                 <CardHeader>
+                    <CardTitle>การมองเห็น *</CardTitle>
+                </CardHeader>
+                <CardContent>
+                     <FormField
+                        control={form.control}
+                        name="visibility"
+                        render={({ field }) => (
+                        <FormItem className="space-y-3">
+                            <FormControl>
+                            <RadioGroup
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                className="flex flex-col space-y-1"
+                            >
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                <FormControl>
+                                    <RadioGroupItem value="public" />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                    สาธารณะ
+                                </FormLabel>
+                                </FormItem>
+                            </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                </CardContent>
+            </Card>
+           
+            <div className="flex justify-end">
                 <Button type="submit">สร้างตัวละคร</Button>
-              </CardFooter>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+            </div>
+             <p className="text-xs text-muted-foreground text-center">
+                โปรดตรวจสอบให้แน่ใจว่าตัวละครเป็นไปตาม <Link href="#" className="underline">ข้อกำหนดและเงื่อนไข</Link>
+            </p>
+        </form>
+      </Form>
     </div>
   );
 }

@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-import Header from '@/components/layout/header';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'คู่หูคุย',
+  title: 'Khui AI',
   description: 'มีส่วนร่วมในการสนทนาสวมบทบาทกับตัวละคร AI',
 };
 
@@ -26,7 +25,6 @@ export default function RootLayout({
       </head>
       <body className={cn('font-body antialiased', 'bg-background text-foreground')}>
         <div className="relative flex min-h-screen flex-col">
-          <Header />
           <main className="flex-1">{children}</main>
         </div>
         <Toaster />

@@ -11,12 +11,12 @@ export type Character = {
 const characters: Character[] = [
   {
     id: '1',
-    name: 'อันยา จอมเวทย์แห่งแสงดาว',
+    name: 'อัลเบิร์ต ไอน์สไตน์',
     avatarUrl: 'https://picsum.photos/400/400?random=1',
-    description: 'จอมเวทย์สาวผู้ใช้พลังแห่งจักรวาล เพื่อไขปริศนาโบราณ',
-    personality: 'อยากรู้อยากเห็น กล้าหาญ และค่อนข้างบ้าบิ่น หลงใหลในตำนานโบราณและวัตถุวิเศษ สามารถจริงจังได้เมื่อสถานการณ์ต้องการ แต่ก็มีด้านที่ขี้เล่น',
-    background: 'เกิดภายใต้ดวงดาวพเนจร อันยาเติบโตในซิลเวอร์วูดอันเงียบสงบ เธอออกจากบ้านเพื่อค้นหาเมืองลูมินาที่สาบสูญ ซึ่งเป็นสถานที่ที่กล่าวกันว่าสร้างขึ้นจากแสงดาวบริสุทธิ์',
-    greeting: 'ฉันรู้สึกถึงแรงดึงดูดในหมู่ดาว และดูเหมือนว่ามันจะนำฉันมาหาคุณ... *ฉันชื่ออันยา จักรวาลกระซิบความลับอะไรกับคุณบ้าง?*',
+    description: 'อัจฉริยะผู้ปฏิวัติวงการฟิสิกส์',
+    personality: 'ฉันเป็นนักฟิสิกส์ มีบุคลิกใจดี ชอบอธิบายแนวคิดซับซ้อนให้เข้าใจง่าย ฉันมีความสนใจในวิทยาศาสตร์ จักรวาล และดนตรีคลาสสิก',
+    background: 'อัลเบิร์ตเกิดในเยอรมนีเมื่อปี 1879 ได้รับรางวัลโนเบลจากการค้นพบปรากฏการณ์โฟโตอิเล็กทริก',
+    greeting: 'สวัสดี ฉันคืออัลเบิร์ต ถามฉันเกี่ยวกับผลงานทางวิทยาศาสตร์ของฉันได้เลย',
   },
   {
     id: '2',
@@ -47,20 +47,23 @@ const characters: Character[] = [
   },
 ];
 
+// In-memory storage for characters
+let inMemoryCharacters: Character[] = [...characters];
+
 export function getCharacters(): Character[] {
-  return characters;
+  return inMemoryCharacters;
 }
 
 export function getCharacterById(id: string): Character | undefined {
-  return characters.find((char) => char.id === id);
+  return inMemoryCharacters.find((char) => char.id === id);
 }
 
 // In a real app, this would add to a database.
 export function addCharacter(character: Omit<Character, 'id'>): Character {
     const newCharacter: Character = {
-        id: String(characters.length + 1),
+        id: String(inMemoryCharacters.length + 1),
         ...character,
     };
-    characters.push(newCharacter);
+    inMemoryCharacters.push(newCharacter);
     return newCharacter;
 }
