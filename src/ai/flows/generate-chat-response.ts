@@ -75,12 +75,11 @@ const generateChatResponseFlow = ai.defineFlow(
         prompt: promptText,
     });
 
-    const filledPrompt = await prompt.renderText({input: {...input, conversationHistory: formattedHistory}});
-
     // Call the prompt with the formatted input.
     const { output } = await ai.generate({
         model: 'googleai/gemini-1.5-flash-latest',
-        prompt: filledPrompt,
+        prompt: promptText,
+        input: {...input, conversationHistory: formattedHistory},
         output: { schema: GenerateChatResponseOutputSchema },
         config: {
             safetySettings: [
