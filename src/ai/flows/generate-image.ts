@@ -18,15 +18,12 @@ const generateImageFlow = ai.defineFlow(
     outputSchema: GenerateImageOutputSchema,
   },
   async (input) => {
-    const { media } = await ai.generate({
-      model: 'googleai/imagen-4.0-fast-generate-001',
-      prompt: `Generate a high-quality anime-style portrait based on the following description: ${input.prompt}. The image should be vibrant, detailed, and suitable for a character profile picture.`,
-    });
-    
-    if (!media.url) {
-      throw new Error('Image generation failed to return a URL.');
-    }
-
-    return { imageUrl: media.url };
+    // START_MODIFICATION
+    // This is a temporary solution to avoid billing errors with the Imagen API.
+    // We will return a random image from picsum.photos instead.
+    const imageUrl = `https://picsum.photos/seed/${encodeURIComponent(input.prompt)}/400/400`;
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
+    return { imageUrl };
+    // END_MODIFICATION
   }
 );
