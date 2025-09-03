@@ -4,7 +4,6 @@
 import Link from 'next/link';
 import {
   Book,
-  Code2,
   Coins,
   Home,
   MessageSquare,
@@ -13,7 +12,6 @@ import {
   Settings,
   Sparkles,
   User,
-  Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CharacterCard } from '@/components/characters/character-card';
@@ -31,12 +29,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import React, { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { SettingsDialog } from '@/components/settings-dialog';
-import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger, SidebarFooter } from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger, SidebarFooter, SidebarInset } from '@/components/ui/sidebar';
 
 
 type CharacterWithLastMessage = Character & { lastMessage?: string };
@@ -126,7 +123,7 @@ export default function HomePage() {
             </SidebarFooter>
         </Sidebar>
 
-      <div className="flex-1 flex flex-col">
+      <SidebarInset>
         <header className="flex items-center justify-between p-4 border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10 h-14">
            <SidebarTrigger className="md:hidden"/>
           <div className="flex-1 max-w-2xl mx-auto">
@@ -140,7 +137,7 @@ export default function HomePage() {
               />
             </div>
           </div>
-          <div className="flex items-center gap-4 ml-4">
+          <div className="flex items-center gap-4 ml-auto">
             <Badge variant="outline" className="gap-2 p-2">
               <Coins className="text-amber-500" />
               24
@@ -181,7 +178,8 @@ export default function HomePage() {
             <Button asChild className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg hover:shadow-emerald-500/50 transition-all transform hover:scale-105">
               <Link href="/character/create">
                 <PlusCircle className="mr-2 h-4 w-4" />
-                สร้างตัวละครใหม่
+                <span className="hidden sm:inline">สร้างตัวละครใหม่</span>
+                <span className="sm:hidden">สร้าง</span>
               </Link>
             </Button>
           </div>
@@ -192,7 +190,7 @@ export default function HomePage() {
             ))}
           </div>
         </main>
-      </div>
+      </SidebarInset>
     </div>
     </SidebarProvider>
   );
