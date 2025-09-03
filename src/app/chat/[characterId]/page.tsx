@@ -91,56 +91,58 @@ export default function ChatPage() {
 
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading || !character) return;
-
+  
     const userMessageText = input;
-    setInput(''); // Clear input immediately
-
-    // Optimistically add user message to the UI
     const tempUserMessageId = `temp-user-${Date.now()}`;
-    const userMessageForUI: Message = {
-      id: tempUserMessageId,
-      author: 'user',
-      text: userMessageText,
-    };
-    setMessages(prev => [...prev, userMessageForUI]);
+    const userMessageForUI: Message = { id: tempUserMessageId, author: 'user', text: userMessageText };
+  
+    setInput('');
     setIsLoading(true);
-    
+    setMessages(prev => [...prev, userMessageForUI]);
+  
     try {
-        // Add user message to DB and get its real ID
-        const finalUserMessageId = await addMessage(character.id, { author: 'user', text: userMessageText });
-        // Update UI with the final ID
-        const finalMessages = messages.map(msg => msg.id === tempUserMessageId ? { ...msg, id: finalUserMessageId } : msg);
-        finalMessages.push({ ...userMessageForUI, id: finalUserMessageId });
-        
-        // Use the updated message list for the AI call
-        const conversationForAI = [...finalMessages.slice(-20)];
-
-        const result = await generateChatResponse({
-            characterName: character.name,
-            characterDescription: character.description,
-            conversationHistory: conversationForAI.map(msg => ({ author: msg.author, text: msg.text })),
-        });
-
-        if (result.response) {
-            // Add AI response to DB
-            const aiResponseId = await addMessage(character.id, { author: 'ai', text: result.response });
-            const aiResponseMessage: Message = { id: aiResponseId, author: 'ai', text: result.response };
-            setMessages(prev => [...prev, userMessageForUI, aiResponseMessage].filter(m => m.id !== tempUserMessageId));
-        } else {
-            throw new Error('AI did not return a response.');
-        }
-
+      // Create conversation history for AI *before* adding the new message to DB
+      // This includes the optimistic message for context
+      const conversationForAI = [...messages, userMessageForUI]
+         .slice(-20) // Get the last 20 messages for context
+         .map(msg => ({ author: msg.author, text: msg.text }));
+  
+      // Get AI response first
+      const result = await generateChatResponse({
+        characterName: character.name,
+        characterDescription: character.description,
+        conversationHistory: conversationForAI,
+      });
+  
+      if (!result.response) {
+        throw new Error('AI did not return a response.');
+      }
+  
+      // Now that we have a successful AI response, save both messages to DB
+      const userMessageId = await addMessage(character.id, { author: 'user', text: userMessageText });
+      const aiMessageId = await addMessage(character.id, { author: 'ai', text: result.response });
+  
+      const finalUserMessage: Message = { id: userMessageId, author: 'user', text: userMessageText };
+      const aiResponseMessage: Message = { id: aiMessageId, author: 'ai', text: result.response };
+  
+      // Update UI by replacing the temp message and adding the final AI message
+      setMessages(prev => [
+          ...prev.filter(msg => msg.id !== tempUserMessageId), 
+          finalUserMessage, 
+          aiResponseMessage
+      ]);
+  
     } catch (error) {
-        console.error('Error in message send/receive flow:', error);
-        toast({
-            variant: 'destructive',
-            title: 'เกิดข้อผิดพลาด',
-            description: 'ไม่สามารถส่งข้อความได้ โปรดลองอีกครั้ง',
-        });
-        // Remove the optimistic user message if an error occurs
-        setMessages(prev => prev.filter(msg => msg.id !== tempUserMessageId));
+      console.error('Error in message send/receive flow:', error);
+      toast({
+        variant: 'destructive',
+        title: 'เกิดข้อผิดพลาด',
+        description: 'ไม่สามารถส่งข้อความได้ โปรดลองอีกครั้ง',
+      });
+      // Remove the optimistic user message if an error occurs
+      setMessages(prev => prev.filter(msg => msg.id !== tempUserMessageId));
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
   
