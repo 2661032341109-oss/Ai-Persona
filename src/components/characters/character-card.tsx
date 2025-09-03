@@ -26,10 +26,10 @@ export function CharacterCard({ character }: CharacterCardProps) {
           <AspectRatio ratio={1 / 1} className="bg-muted rounded-md overflow-hidden">
             <Image
               src={character.avatarUrl}
-              alt={`Avatar of ${character.name}`}
+              alt={`รูปประจำตัวของ ${character.name}`}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
-              data-ai-hint="character portrait"
+              data-ai-hint="ภาพถ่ายบุคคล"
             />
           </AspectRatio>
         </CardContent>

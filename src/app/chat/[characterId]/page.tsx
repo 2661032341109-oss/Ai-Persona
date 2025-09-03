@@ -42,7 +42,7 @@ export default function ChatPage() {
           },
         ]);
       } else {
-        router.push('/'); // Character not found
+        router.push('/'); // ไม่พบตัวละคร
       }
       setIsCharacterLoading(false);
     }
@@ -71,7 +71,7 @@ export default function ChatPage() {
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
         author: 'ai',
-        text: `She considers your words carefully, her eyes thoughtful. *So, you want to talk about "${input.toLowerCase()}"? That's an interesting topic. Tell me more about why that's on your mind.* I'm listening.`,
+        text: `เธอพิจารณาคำพูดของคุณอย่างรอบคอบ ดวงตาของเธอครุ่นคิด *งั้นคุณอยากจะพูดถึงเรื่อง "${input.toLowerCase()}" สินะ? นั่นเป็นหัวข้อที่น่าสนใจ บอกฉันเพิ่มเติมหน่อยสิว่าทำไมคุณถึงคิดเรื่องนี้อยู่* ฉันกำลังฟังอยู่`,
       };
       setMessages((prev) => [...prev, aiResponse]);
       setIsLoading(false);

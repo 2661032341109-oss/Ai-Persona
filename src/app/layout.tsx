@@ -5,8 +5,8 @@ import Header from '@/components/layout/header';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'Khui Companion',
-  description: 'Engage in roleplay conversations with AI characters.',
+  title: 'คู่หูคุย',
+  description: 'มีส่วนร่วมในการสนทนาสวมบทบาทกับตัวละคร AI',
 };
 
 export default function RootLayout({
@@ -15,12 +15,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="th" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,700;1,400;1,700&display=swap"
           rel="stylesheet"
         />
       </head>

@@ -19,16 +19,16 @@ export function ChatLayout({ character, children }: ChatLayoutProps) {
            <Button variant="ghost" asChild className="-ml-4 mb-4">
             <Link href="/">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                All Characters
+                ตัวละครทั้งหมด
             </Link>
         </Button>
           <AspectRatio ratio={1/1} className="rounded-lg overflow-hidden mb-4">
             <Image
                 src={character.avatarUrl}
-                alt={`Avatar of ${character.name}`}
+                alt={`รูปประจำตัวของ ${character.name}`}
                 fill
                 className="object-cover"
-                data-ai-hint="character portrait"
+                data-ai-hint="ภาพถ่ายบุคคล"
             />
           </AspectRatio>
           <h2 className="text-2xl font-bold font-headline">{character.name}</h2>
@@ -37,11 +37,11 @@ export function ChatLayout({ character, children }: ChatLayoutProps) {
         <Separator />
         <div className="flex-1 overflow-y-auto p-6 text-sm space-y-4">
           <div>
-            <h3 className="font-semibold text-foreground/80 mb-2">Personality</h3>
+            <h3 className="font-semibold text-foreground/80 mb-2">บุคลิกภาพ</h3>
             <p className="text-muted-foreground">{character.personality}</p>
           </div>
           <div>
-            <h3 className="font-semibold text-foreground/80 mb-2">Background</h3>
+            <h3 className="font-semibold text-foreground/80 mb-2">พื้นหลัง</h3>
             <p className="text-muted-foreground whitespace-pre-wrap">{character.background}</p>
           </div>
         </div>

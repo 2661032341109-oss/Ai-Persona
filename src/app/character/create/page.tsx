@@ -31,21 +31,21 @@ import Link from 'next/link';
 
 const formSchema = z.object({
   name: z.string().min(2, {
-    message: 'Name must be at least 2 characters.',
+    message: 'ชื่อต้องมีอย่างน้อย 2 ตัวอักษร',
   }),
   description: z.string().min(10, {
-    message: 'Description must be at least 10 characters.',
+    message: 'คำอธิบายต้องมีอย่างน้อย 10 ตัวอักษร',
   }),
   personality: z.string().min(10, {
-    message: 'Personality must be at least 10 characters.',
+    message: 'บุคลิกภาพต้องมีอย่างน้อย 10 ตัวอักษร',
   }),
   background: z.string().min(10, {
-    message: 'Background must be at least 10 characters.',
+    message: 'พื้นหลังต้องมีอย่างน้อย 10 ตัวอักษร',
   }),
   greeting: z.string().min(5, {
-    message: 'Greeting must be at least 5 characters.',
+    message: 'คำทักทายต้องมีอย่างน้อย 5 ตัวอักษร',
   }),
-  avatarUrl: z.string().url({ message: 'Please enter a valid URL.' }).optional().or(z.literal('')),
+  avatarUrl: z.string().url({ message: 'กรุณาใส่ URL ที่ถูกต้อง' }).optional().or(z.literal('')),
 });
 
 export default function CreateCharacterPage() {
@@ -72,8 +72,8 @@ export default function CreateCharacterPage() {
     addCharacter(newCharacter);
     
     toast({
-      title: 'Character Created!',
-      description: `${values.name} has joined the roster.`,
+      title: 'สร้างตัวละครแล้ว!',
+      description: `${values.name} ได้เข้าร่วมบัญชีรายชื่อแล้ว`,
     });
     router.push('/');
   }
@@ -83,14 +83,14 @@ export default function CreateCharacterPage() {
         <Button variant="ghost" asChild className="mb-4">
             <Link href="/">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Characters
+                กลับไปที่ตัวละคร
             </Link>
         </Button>
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline text-3xl">Create a New Character</CardTitle>
+          <CardTitle className="font-headline text-3xl">สร้างตัวละครใหม่</CardTitle>
           <CardDescription>
-            Bring your own companion to life. Define their identity, story, and how they greet the world.
+            ทำให้เพื่อนคู่ใจของคุณมีชีวิตขึ้นมา กำหนดตัวตน เรื่องราว และวิธีที่พวกเขาทักทายโลก
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -101,11 +101,11 @@ export default function CreateCharacterPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>ชื่อ</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Anya the Starlight Mage" {...field} />
+                      <Input placeholder="เช่น อันยา จอมเวทย์แห่งแสงดาว" {...field} />
                     </FormControl>
-                    <FormDescription>The character's full name or title.</FormDescription>
+                    <FormDescription>ชื่อเต็มหรือตำแหน่งของตัวละคร</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -115,11 +115,11 @@ export default function CreateCharacterPage() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Short Description</FormLabel>
+                    <FormLabel>คำอธิบายสั้น ๆ</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="A brief, one-sentence summary of the character." {...field} />
+                      <Textarea placeholder="สรุปสั้น ๆ หนึ่งประโยคเกี่ยวกับตัวละคร" {...field} />
                     </FormControl>
-                    <FormDescription>This appears on the character card.</FormDescription>
+                    <FormDescription>ข้อความนี้จะปรากฏบนการ์ดตัวละคร</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -129,11 +129,11 @@ export default function CreateCharacterPage() {
                 name="personality"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Personality</FormLabel>
+                    <FormLabel>บุคลิกภาพ</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Describe their traits, quirks, and mannerisms." {...field} rows={4} />
+                      <Textarea placeholder="อธิบายลักษณะนิสัย ลักษณะเฉพาะ และท่าทางของพวกเขา" {...field} rows={4} />
                     </FormControl>
-                     <FormDescription>How do they behave and interact?</FormDescription>
+                     <FormDescription>พวกเขาประพฤติตนและมีปฏิสัมพันธ์อย่างไร?</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -143,11 +143,11 @@ export default function CreateCharacterPage() {
                 name="background"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Background</FormLabel>
+                    <FormLabel>พื้นหลัง</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Tell their story. Where are they from? What events shaped them?" {...field} rows={6}/>
+                      <Textarea placeholder="เล่าเรื่องราวของพวกเขา พวกเขามาจากไหน? เหตุการณ์ใดที่หล่อหลอมพวกเขา?" {...field} rows={6}/>
                     </FormControl>
-                    <FormDescription>The character's history and lore.</FormDescription>
+                    <FormDescription>ประวัติและเรื่องราวของตัวละคร</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -157,11 +157,11 @@ export default function CreateCharacterPage() {
                 name="greeting"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Greeting</FormLabel>
+                    <FormLabel>คำทักทาย</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="How does the character first introduce themselves?" {...field} rows={3}/>
+                      <Textarea placeholder="ตัวละครแนะนำตัวเองครั้งแรกอย่างไร?" {...field} rows={3}/>
                     </FormControl>
-                    <FormDescription>The first message they will send in a new chat.</FormDescription>
+                    <FormDescription>ข้อความแรกที่พวกเขาจะส่งในการแชทใหม่</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -171,19 +171,19 @@ export default function CreateCharacterPage() {
                 name="avatarUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Avatar URL</FormLabel>
+                    <FormLabel>URL รูปประจำตัว</FormLabel>
                     <FormControl>
                       <Input placeholder="https://example.com/image.png" {...field} />
                     </FormControl>
                     <FormDescription>
-                      Link to an image for the character's portrait. Leave blank for a random image.
+                      ลิงก์ไปยังรูปภาพสำหรับภาพเหมือนของตัวละคร เว้นว่างไว้สำหรับรูปภาพแบบสุ่ม
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <CardFooter className="px-0 pt-6">
-                <Button type="submit">Create Character</Button>
+                <Button type="submit">สร้างตัวละคร</Button>
               </CardFooter>
             </form>
           </Form>

@@ -27,7 +27,7 @@ export function ChatInput({
   return (
     <div className="relative">
       <Textarea
-        placeholder="Type your message... (Shift+Enter for new line)"
+        placeholder="พิมพ์ข้อความของคุณ... (Shift+Enter เพื่อขึ้นบรรทัดใหม่)"
         className="w-full pr-16 py-3 text-base resize-none"
         value={input}
         onChange={(e) => setInput(e.target.value)}
@@ -41,7 +41,7 @@ export function ChatInput({
         className="absolute right-3 top-1/2 -translate-y-1/2"
         onClick={handleSendMessage}
         disabled={isLoading || !input.trim()}
-        aria-label="Send message"
+        aria-label="ส่งข้อความ"
       >
         <SendHorizontal />
       </Button>

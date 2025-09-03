@@ -12,16 +12,16 @@ export default function HomePage() {
       <div className="flex justify-between items-start md:items-center mb-8 gap-4 flex-col md:flex-row">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold font-headline text-foreground">
-            Choose Your Companion
+            เลือกคู่หูของคุณ
           </h1>
           <p className="text-muted-foreground mt-2 max-w-2xl">
-            Select a character to start a roleplay conversation, or bring your own imagination to life by creating a new one.
+            เลือกตัวละครเพื่อเริ่มการสนทนาสวมบทบาท หรือสร้างจินตนาการของคุณเองให้มีชีวิตขึ้นมาโดยการสร้างตัวละครใหม่
           </p>
         </div>
         <Button asChild className="shrink-0">
           <Link href="/character/create">
             <PlusCircle className="mr-2 h-4 w-4" />
-            Create Character
+            สร้างตัวละคร
           </Link>
         </Button>
       </div>
