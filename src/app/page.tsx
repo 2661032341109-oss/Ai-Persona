@@ -35,6 +35,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import React, { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { SettingsDialog } from '@/components/settings-dialog';
 
 
 type CharacterWithLastMessage = Character & { lastMessage?: string };
@@ -132,6 +133,7 @@ export default function HomePage() {
               24
             </Badge>
             <Button className="bg-gradient-to-r from-primary to-accent text-white">เติมคอยน์</Button>
+            <SettingsDialog />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar className="cursor-pointer hover:ring-2 hover:ring-primary transition-all">
@@ -160,9 +162,9 @@ export default function HomePage() {
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 md:p-8 bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50">
+        <main className="flex-1 p-4 sm:p-6 md:p-8 bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50 dark:from-slate-900 dark:via-purple-950 dark:to-slate-950">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold text-gray-800">สำรวจตัวละคร</h2>
+            <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200">สำรวจตัวละคร</h2>
             <Button asChild className="bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg hover:shadow-emerald-500/50 transition-all transform hover:scale-105">
               <Link href="/character/create">
                 <PlusCircle className="mr-2 h-4 w-4" />

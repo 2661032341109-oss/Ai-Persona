@@ -62,10 +62,10 @@ export function CharacterCard({ character, onCharacterDeleted }: CharacterCardPr
 
 
   return (
-    <Card className="h-full flex flex-col overflow-hidden transition-all duration-300 ease-in-out group hover:shadow-xl hover:-translate-y-1 hover:shadow-primary/20 rounded-2xl border-stone-200/60 bg-white/80 backdrop-blur-sm">
+    <Card className="h-full flex flex-col overflow-hidden transition-all duration-300 ease-in-out group hover:shadow-xl hover:-translate-y-1 hover:shadow-primary/20 rounded-2xl border-stone-200/60 bg-white/80 dark:bg-slate-800/60 backdrop-blur-sm dark:border-slate-700">
         <CardHeader className="flex-row items-start justify-between p-4">
             <div className='w-full'>
-                <CardTitle className="font-headline tracking-tight text-lg text-gray-800 pr-8">{character.name}</CardTitle>
+                <CardTitle className="font-headline tracking-tight text-lg text-gray-800 dark:text-gray-200 pr-8">{character.name}</CardTitle>
                 <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{character.tagline}</p>
             </div>
             <AlertDialog>
@@ -120,8 +120,8 @@ export function CharacterCard({ character, onCharacterDeleted }: CharacterCardPr
         {character.lastMessage && (
             <CardFooter className="p-4 pt-0">
                 <Link href={`/chat/${character.id}`} className="w-full">
-                    <div className="text-xs text-muted-foreground bg-gray-100/80 p-3 rounded-lg w-full line-clamp-2 hover:bg-gray-200/70 transition-colors">
-                        <span className="font-semibold text-gray-600">ล่าสุด:</span> {character.lastMessage}
+                    <div className="text-xs text-muted-foreground bg-gray-100/80 dark:bg-slate-700/50 p-3 rounded-lg w-full line-clamp-2 hover:bg-gray-200/70 dark:hover:bg-slate-600/60 transition-colors">
+                        <span className="font-semibold text-gray-600 dark:text-gray-300">ล่าสุด:</span> {character.lastMessage}
                     </div>
                 </Link>
             </CardFooter>

@@ -17,8 +17,11 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['"Sarabun"', 'sans-serif'],
-        headline: ['"Sarabun"', 'sans-serif'],
+        sarabun: ['"Sarabun"', 'sans-serif'],
+        'ibm-plex-sans-thai': ['"IBM Plex Sans Thai"', 'sans-serif'],
+        'noto-sans-thai': ['"Noto Sans Thai"', 'sans-serif'],
+        body: ['var(--font-family)', 'sans-serif'],
+        headline: ['var(--font-family)', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
