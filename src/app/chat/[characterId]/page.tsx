@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import type { Character } from '@/lib/characters';
 import { getCharacterById } from '@/lib/characters';
@@ -9,9 +9,10 @@ import { ChatLayout } from '@/components/chat/chat-layout';
 import { ChatInput } from '@/components/chat/chat-input';
 import { ChatMessage } from '@/components/chat/chat-message';
 import { TypingIndicator } from '@/components/chat/typing-indicator';
-import { Skeleton } from '@/components/ui/skeleton';
 import { generateChatResponse } from '@/ai/flows/generate-chat-response';
 import { useToast } from '@/hooks/use-toast';
+import { getConversation, saveConversation } from '@/lib/conversations';
+
 
 export type Message = {
   id: string;
@@ -33,6 +34,22 @@ export default function ChatPage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const fetchChatHistory = useCallback(async (char: Character) => {
+      const history = await getConversation(char.id);
+      if (history.length > 0) {
+          setMessages(history);
+      } else {
+          // Start with only the character's greeting if no history
+          const greetingMessage: Message = {
+            id: 'greeting-' + char.id,
+            author: 'ai',
+            text: char.greeting,
+          };
+          setMessages([greetingMessage]);
+          await saveConversation(char.id, [greetingMessage]);
+      }
+  }, []);
+
   useEffect(() => {
     if (characterId) {
       const fetchCharacter = async () => {
@@ -40,16 +57,8 @@ export default function ChatPage() {
         const char = await getCharacterById(characterId);
         if (char) {
           setCharacter(char);
-          // Start with only the character's greeting
-          setMessages([
-            {
-              id: 'greeting-' + char.id,
-              author: 'ai',
-              text: char.greeting,
-            },
-          ]);
+          await fetchChatHistory(char);
         } else {
-          // Character not found, redirect to home
           router.push('/');
           toast({
             variant: 'destructive',
@@ -61,7 +70,7 @@ export default function ChatPage() {
       }
       fetchCharacter();
     }
-  }, [characterId, router, toast]);
+  }, [characterId, router, toast, fetchChatHistory]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -81,6 +90,9 @@ export default function ChatPage() {
     setMessages(newMessages);
     setInput('');
     setIsLoading(true);
+    
+    // Optimistically save user message
+    await saveConversation(character.id, newMessages);
 
     try {
       const result = await generateChatResponse({
@@ -95,7 +107,9 @@ export default function ChatPage() {
           author: 'ai',
           text: result.response,
         };
-        setMessages((prev) => [...prev, aiResponse]);
+        const finalMessages = [...newMessages, aiResponse];
+        setMessages(finalMessages);
+        await saveConversation(character.id, finalMessages);
       } else {
         throw new Error('AI did not return a response.');
       }
@@ -106,8 +120,9 @@ export default function ChatPage() {
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถสร้างคำตอบได้ โปรดลองอีกครั้งในภายหลัง',
       });
-      // Optional: remove the user's message if the AI fails
+      // Revert to previous state if AI fails
       setMessages(messages);
+      await saveConversation(character.id, messages);
     } finally {
       setIsLoading(false);
     }
