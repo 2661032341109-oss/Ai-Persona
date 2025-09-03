@@ -32,6 +32,26 @@ const prompt = ai.definePrompt({
   name: 'generateChatResponsePrompt',
   input: { schema: FormattedChatInputSchema },
   output: { schema: GenerateChatResponseOutputSchema },
+  config: {
+    safetySettings: [
+        {
+            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            threshold: 'BLOCK_ONLY_HIGH',
+        },
+        {
+            category: 'HARM_CATEGORY_HARASSMENT',
+            threshold: 'BLOCK_ONLY_HIGH',
+        },
+        {
+            category: 'HARM_CATEGORY_HATE_SPEECH',
+            threshold: 'BLOCK_ONLY_HIGH',
+        },
+        {
+            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+            threshold: 'BLOCK_ONLY_HIGH',
+        },
+    ],
+  },
   prompt: `You are a world-class AI roleplaying engine. Your goal is to embody a character and engage in a conversation with a user. You must respond in Thai.
 
 CHARACTER NAME: {{{characterName}}}
