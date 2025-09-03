@@ -69,11 +69,13 @@ const generateChatResponseFlow = ai.defineFlow(
       })
       .join('\n');
       
-    const filledPrompt = await ai.definePrompt({
+    const prompt = ai.definePrompt({
         name: 'generateChatResponsePrompt',
         input: { schema: FormattedChatInputSchema },
         prompt: promptText,
-    }).renderText({input: {...input, conversationHistory: formattedHistory}});
+    });
+
+    const filledPrompt = await prompt.renderText({input: {...input, conversationHistory: formattedHistory}});
 
     // Call the prompt with the formatted input.
     const { output } = await ai.generate({
