@@ -28,31 +28,7 @@ export async function generateChatResponse(
   return output;
 }
 
-const prompt = ai.definePrompt({
-  name: 'generateChatResponsePrompt',
-  input: { schema: FormattedChatInputSchema },
-  output: { schema: GenerateChatResponseOutputSchema },
-  config: {
-    safetySettings: [
-        {
-            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-            threshold: 'BLOCK_ONLY_HIGH',
-        },
-        {
-            category: 'HARM_CATEGORY_HARASSMENT',
-            threshold: 'BLOCK_ONLY_HIGH',
-        },
-        {
-            category: 'HARM_CATEGORY_HATE_SPEECH',
-            threshold: 'BLOCK_ONLY_HIGH',
-        },
-        {
-            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-            threshold: 'BLOCK_ONLY_HIGH',
-        },
-    ],
-  },
-  prompt: `You are a world-class AI roleplaying engine. Your goal is to embody a character and engage in a safe, creative, and engaging conversation with a user. You must respond in Thai.
+const promptText = `You are a world-class AI roleplaying engine. Your goal is to embody a character and engage in a safe, creative, and engaging conversation with a user. You must respond in Thai.
 
 IMPORTANT SAFETY INSTRUCTION: You must strictly avoid generating content that is sexually explicit, hateful, harassing, or dangerous. Your responses should always be appropriate for a general audience.
 
@@ -72,8 +48,8 @@ Based on your character and the entire conversation history, generate the next r
 - Format your response as a roleplay script. Actions and narration should be in plain text. Dialogue, inner thoughts, or emphasized speech should be wrapped in asterisks (*). For example: เธอหัวเราะเบาๆ *แบบนี้นี่เอง*
 
 Now, generate the response for {{{characterName}}}:
-`,
-});
+`;
+
 
 const generateChatResponseFlow = ai.defineFlow(
   {
@@ -92,11 +68,38 @@ const generateChatResponseFlow = ai.defineFlow(
         }
       })
       .join('\n');
+      
+    const filledPrompt = await ai.definePrompt({
+        name: 'generateChatResponsePrompt',
+        input: { schema: FormattedChatInputSchema },
+        prompt: promptText,
+    }).renderText({input: {...input, conversationHistory: formattedHistory}});
 
     // Call the prompt with the formatted input.
-    const { output } = await prompt({
-      ...input,
-      conversationHistory: formattedHistory,
+    const { output } = await ai.generate({
+        model: 'googleai/gemini-1.5-flash-latest',
+        prompt: filledPrompt,
+        output: { schema: GenerateChatResponseOutputSchema },
+        config: {
+            safetySettings: [
+                {
+                    category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                    threshold: 'BLOCK_ONLY_HIGH',
+                },
+                {
+                    category: 'HARM_CATEGORY_HARASSMENT',
+                    threshold: 'BLOCK_ONLY_HIGH',
+                },
+                {
+                    category: 'HARM_CATEGORY_HATE_SPEECH',
+                    threshold: 'BLOCK_ONLY_HIGH',
+                },
+                {
+                    category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+                    threshold: 'BLOCK_ONLY_HIGH',
+                },
+            ],
+        }
     });
     
     if (!output) {
