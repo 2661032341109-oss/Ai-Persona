@@ -20,22 +20,22 @@ export function ChatMessage({ message, character }: ChatMessageProps) {
   return (
     <div
       className={cn(
-        'flex items-start gap-3',
+        'flex items-start gap-4',
         isUser ? 'justify-end' : 'justify-start'
       )}
     >
       {!isUser && (
-        <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
+        <Avatar className="h-10 w-10 border-2 border-background shadow-lg transition-transform hover:scale-110">
           <AvatarImage src={character.avatarUrl || `https://picsum.photos/seed/${encodeURIComponent(character.name)}/400/400`} alt={character.name} />
           <AvatarFallback>{character.name.charAt(0)}</AvatarFallback>
         </Avatar>
       )}
       <div
         className={cn(
-          'max-w-md rounded-lg px-4 py-3 text-base shadow-sm',
+          'max-w-xl rounded-2xl px-5 py-3 text-base shadow-lg transition-all',
           isUser
-            ? 'bg-primary/90 text-primary-foreground'
-            : 'bg-card text-card-foreground'
+            ? 'bg-gradient-to-br from-blue-500 to-cyan-400 text-white rounded-br-none'
+            : 'bg-white text-slate-800 rounded-bl-none'
         )}
       >
         {isUser ? (
@@ -45,8 +45,8 @@ export function ChatMessage({ message, character }: ChatMessageProps) {
         )}
       </div>
       {isUser && (
-        <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
-          <AvatarFallback>
+        <Avatar className="h-10 w-10 border-2 border-background shadow-lg">
+           <AvatarFallback className="bg-slate-200 text-slate-600">
             <User className="h-5 w-5" />
           </AvatarFallback>
         </Avatar>

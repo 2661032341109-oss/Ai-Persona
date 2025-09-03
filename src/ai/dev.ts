@@ -6,4 +6,6 @@ import '@/ai/flows/summarize-conversation-context.ts';
 import '@/ai/flows/generate-character-details.ts';
 import '@/ai/flows/generate-image.ts';
 import '@/ai/flows/generate-character-from-draft.ts';
+import '@/ai/flows/generate-chat-response.ts';
 import '@/ai/schemas.ts';
+

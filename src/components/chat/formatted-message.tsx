@@ -1,26 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { formatRoleplayScript } from '@/ai/flows/format-roleplay-script';
-import { Skeleton } from '@/components/ui/skeleton';
+import React from 'react';
 
 interface FormattedMessageProps {
   text: string;
 }
 
-// A simple parser assuming the AI wraps dialogue in asterisks (*dialogue*).
+// A simple parser that splits the text by asterisks and applies styling.
+// Example: "This is narration. *This is dialogue.* This is more narration."
 const parseFormattedText = (text: string): React.ReactNode => {
-  if (!text.includes('*')) {
-    return <p className="whitespace-pre-wrap">{text}</p>;
-  }
+  if (!text) return null;
 
   const parts = text.split(/(\*.*?\*)/g).filter(Boolean);
 
   const content = parts.map((part, index) => {
     if (part.startsWith('*') && part.endsWith('*')) {
       // Italicized part (Dialogue/Inner Tone)
+      // Use a more distinct color for dialogue
       return (
-        <i key={index} className="text-muted-foreground">
+        <i key={index} className="text-slate-600 font-serif">
           {part.slice(1, -1)}
         </i>
       );
@@ -29,41 +27,14 @@ const parseFormattedText = (text: string): React.ReactNode => {
     return <span key={index}>{part}</span>;
   });
 
-  return <p className="whitespace-pre-wrap">{content}</p>;
+  return <p className="whitespace-pre-wrap leading-relaxed">{content}</p>;
 };
 
 
 export function FormattedMessage({ text }: FormattedMessageProps) {
-  const [formattedContent, setFormattedContent] = useState<React.ReactNode | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Directly parse the text. No need for useEffect or loading states
+  // as this is a simple, synchronous operation.
+  const formattedContent = parseFormattedText(text);
 
-  useEffect(() => {
-    const processText = async () => {
-      setIsLoading(true);
-      try {
-        const result = await formatRoleplayScript({ text });
-        const content = parseFormattedText(result.formattedText);
-        setFormattedContent(content);
-      } catch (error) {
-        console.error('Failed to format message:', error);
-        // Fallback to unformatted text on error
-        setFormattedContent(<p className="whitespace-pre-wrap">{text}</p>);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    processText();
-  }, [text]);
-
-  if (isLoading) {
-    return (
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-2/3" />
-      </div>
-    );
-  }
-
-  return formattedContent;
+  return <>{formattedContent}</>;
 }

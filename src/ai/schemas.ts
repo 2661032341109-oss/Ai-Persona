@@ -52,3 +52,19 @@ export const GenerateCharacterFromDraftOutputSchema = z.object({
     tags: z.array(z.string()).describe("A list of 5-10 relevant tags based on the draft."),
 });
 export type GenerateCharacterFromDraftOutput = z.infer<typeof GenerateCharacterFromDraftOutputSchema>;
+
+// Generate Chat Response
+export const GenerateChatResponseInputSchema = z.object({
+    characterDescription: z.string().describe("The character's detailed personality description."),
+    characterName: z.string().describe("The character's name."),
+    conversationHistory: z.array(z.object({
+        author: z.enum(['user', 'ai']),
+        text: z.string(),
+    })).describe('The history of the conversation so far.'),
+});
+export type GenerateChatResponseInput = z.infer<typeof GenerateChatResponseInputSchema>;
+
+export const GenerateChatResponseOutputSchema = z.object({
+    response: z.string().describe("The AI's response in character."),
+});
+export type GenerateChatResponseOutput = z.infer<typeof GenerateChatResponseOutputSchema>;
