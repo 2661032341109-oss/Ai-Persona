@@ -11,6 +11,16 @@ export async function generateImage(input: GenerateImageInput): Promise<Generate
   return generateImageFlow(input);
 }
 
+const prompt = ai.definePrompt({
+    name: 'generateImagePrompt',
+    input: { schema: GenerateImageInputSchema },
+    prompt: `Generate a high-quality, anime-style portrait of a character based on the following description. The image should be suitable for a character profile.
+
+Description: {{{prompt}}}
+`,
+});
+
+
 const generateImageFlow = ai.defineFlow(
   {
     name: 'generateImageFlow',
@@ -18,12 +28,15 @@ const generateImageFlow = ai.defineFlow(
     outputSchema: GenerateImageOutputSchema,
   },
   async (input) => {
-    // START_MODIFICATION
-    // This is a temporary solution to avoid billing errors with the Imagen API.
-    // We will return a random image from picsum.photos instead.
-    const imageUrl = `https://picsum.photos/seed/${encodeURIComponent(input.prompt)}/400/400`;
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
-    return { imageUrl };
-    // END_MODIFICATION
+    const { media } = await ai.generate({
+        model: 'googleai/gemini-1.5-flash-latest',
+        prompt: await prompt.renderText({input}),
+    });
+
+    if (!media || !media.url) {
+        throw new Error('Image generation failed to return a valid image.');
+    }
+    
+    return { imageUrl: media.url };
   }
 );
