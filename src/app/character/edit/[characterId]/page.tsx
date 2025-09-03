@@ -47,8 +47,6 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react';
 import React from 'react';
-import { generateImage } from '@/ai/flows/generate-image';
-import type { GenerateImageInput } from '@/ai/schemas';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const tagsConfig = {
@@ -70,7 +68,7 @@ const tagsConfig = {
     { name: 'ตัวละครมีม', icon: Smile },
     { name: 'ออริจินอล', icon: Bot },
   ],
-   'บทบาท': [{ name: 'นักแสดง', icon: PersonStanding}, { name: 'นักร้อง', icon: Mic }, { name: 'ไอดอล', icon: Star }, { name: 'นักกีฬา', icon: Dumbbell }, { name: 'นักธุรกิจ', icon: Handshake }, { name: 'นักการเมือง', icon: Speech }, { name: 'บุคคลสำคัญในประวัติศาสตร์', icon: History }, { name: 'ยูทูบเบอร์', icon: SquarePlay }, { name: 'สตรีมเมอร์', icon: TvMinimal }, { name: 'วีทูบเบอร์', icon: Sticker }, { name: 'อินฟลูเอนเซอร์เสมือน', icon: Globe }, { name: 'มาเฟีย', icon: PocketKnife }, { name: 'ระบบ', icon: CodeXml }, { name: 'วิศวะ', icon: Wrench }, { name: 'พ่อหมอ', icon: Sparkles }, { name: 'หมอ', icon: Stethoscope }, { name: 'ครู', icon: School }, { name: 'ศิลปิน', icon: Palette }, { name: 'เชฟ', icon: ChefHat }, { name: 'นักบิน', icon: Plane }, { name: 'ช่างภาพ', icon: Camera }, { name: 'นักดนตรี', icon: Music2 }, { name: 'โปรแกรมเมอร์', icon: CodeXml }, { name: 'บอดี้การ์ด', icon: Shield }, { name: 'หุ่นยนต์', icon: Bot }, { name: 'นักวิทยาศาสตร์', icon: GraduationCap }, { name: 'นักสืบ', icon: Eye }, { name: 'ตำรวจ', icon: Shield }, { name: 'อัศวิน', icon: Swords }, { name: 'นักบวช', icon: BookText }, { name: 'แม่ชี', icon: BookHeart }, { name: 'พ่อบ้าน', icon: Users }, { name: 'เทพเจ้า', icon: Crown }, { name: 'คนไข้', icon: Stethoscope }, { name: 'พยาบาล', icon: Stethoscope }, { name: 'นักบุญ', icon: Star }, { name: 'ตัวร้าย', icon: Skull }, { name: 'ฮีโร่', icon: Shield }, { name: 'ขุนนาง', icon: Crown }, { name: 'นักศึกษา', icon: GraduationCap }, { name: 'จักรพรรดิ', icon: Crown }, { name: 'พระมเหสี', icon: Crown }, { name: 'พระสนม', icon: HeartCrack }, { name: 'รัชทายาท', icon: Star }],
+   'บทบาท': [{ name: 'นักแสดง', icon: PersonStanding}, { name: 'นักร้อง', icon: Mic }, { name: 'ไอดอล', icon: Star }, { name: 'นักกีฬา', icon: Dumbbell }, { name: 'นักธุรกิจ', icon: Handshake }, { name: 'นักการเมือง', icon: Speech }, { name: 'บุคคลสำคัญในประวัติศาสตร์', icon: History }, { name: 'ยูทูบเบอร์', icon: SquarePlay }, { name: 'สตรีมเมอร์', icon: TvMinimal }, { name: 'วีทูบเบอร์', icon: Sticker }, { name: 'อินฟลูเอนเซอร์เสมือน', icon: Globe }, { name: 'มาเฟีย', icon: PocketKnife }, { name: 'ระบบ', icon: CodeXml }, { name: 'วิศวะ', icon: Wrench }, { name: 'พ่อหมอ', icon: Sparkles }, { name: 'หมอ', icon: Stethoscope }, { name: 'ครู', icon: School }, { name: 'ศิลปิน', icon: Palette }, { name: 'เชฟ', icon: ChefHat }, { name: 'นักบิน', icon: Plane }, { name: 'ช่างภาพ', icon: Camera }, { name: 'นักดนตรี', icon: Music2, }, { name: 'โปรแกรมเมอร์', icon: CodeXml }, { name: 'บอดี้การ์ด', icon: Shield }, { name: 'หุ่นยนต์', icon: Bot }, { name: 'นักวิทยาศาสตร์', icon: GraduationCap }, { name: 'นักสืบ', icon: Eye }, { name: 'ตำรวจ', icon: Shield }, { name: 'อัศวิน', icon: Swords }, { name: 'นักบวช', icon: BookText }, { name: 'แม่ชี', icon: BookHeart }, { name: 'พ่อบ้าน', icon: Users }, { name: 'เทพเจ้า', icon: Crown }, { name: 'คนไข้', icon: Stethoscope }, { name: 'พยาบาล', icon: Stethoscope }, { name: 'นักบุญ', icon: Star }, { name: 'ตัวร้าย', icon: Skull }, { name: 'ฮีโร่', icon: Shield }, { name: 'ขุนนาง', icon: Crown }, { name: 'นักศึกษา', icon: GraduationCap }, { name: 'จักรพรรดิ', icon: Crown }, { name: 'พระมเหสี', icon: Crown }, { name: 'พระสนม', icon: HeartCrack }, { name: 'รัชทายาท', icon: Star }],
   'บุคลิกและลักษณะนิสัย': [{ name: 'โรแมนติก', icon: MessageCircleHeart }, { name: 'อ่อนโยน', icon: HandHeart }, { name: 'ตลก', icon: Laugh }, { name: 'สยองขวัญ', icon: Ghost }, { name: 'ระทึกขวัญ', icon: Skull }, { name: 'ดราม่า', icon: Frown }, { name: 'ลึกลับ', icon: Eye }, { name: 'ซึนเดเระ', icon: HandHeart }, { name: 'คูเดระ', icon: Eye }, { name: 'ฉลาด', icon: Bot }, { name: 'ขี้อาย', icon: User }, { name: 'จริงจัง', icon: FileText }, { name: 'ร่าเริง', icon: Smile }, { name: 'ซุ่มซ่าม', icon: Rabbit }, { name: 'แฟนออกสาว', icon: Users }, { name: 'หมาโกลเด้น', icon: Dog }, { name: 'แมวดำ', icon: Dog }, { name: 'อีนิกม่า', icon: CircleHelp }, { name: 'อัลฟ่า', icon: Crown }, { name: 'เบต้า', icon: Shield }, { name: 'โอเมก้า', icon: Omega }, { name: 'เนิร์ด', icon: Glasses }, { name: 'หมาเด็ก', icon: Dog }, { name: 'หมาแก่', icon: Dog }, { name: 'ซามอยด์', icon: Dog }, { name: 'เจ้าเล่ห์', icon: Eye }],
   'ประเภท/องค์ประกอบเรื่อง': [{ name: 'ไทยโบราณ', icon: ScrollText }, { name: 'ผจญภัย', icon: Footprints }, { name: 'แฟนตาซี', icon: WandSparkles }, { name: 'แอคชัน', icon: Swords }, { name: 'ชีวิตประจำวัน', icon: Handshake }, { name: 'ยุคกลาง', icon: Swords }, { name: 'ข้ามมิติ', icon: Globe }, { name: 'เกิดใหม่', icon: ArrowUp }, { name: 'ไซไฟ', icon: Bot }, { name: 'หลังวันสิ้นโลก', icon: Skull }, { name: 'จีนย้อนยุค', icon: ScrollText }],
   'เพศและความสัมพันธ์': [{ name: 'แฟน', icon: HeartCrack }, { name: 'แต่งงาน', icon: HandHeart }, { name: 'ยาโอย', icon: HandHeart }, { name: 'ยูริ', icon: BookHeart }, { name: 'ชายหญิง', icon: MessageCircleHeart }, { name: 'ชาย', icon: User }, { name: 'หญิง', icon: User }, { name: 'ไบเซ็กชวล', icon: HandHeart }, { name: 'ฟูตะ', icon: Users }, { name: 'เฟมบอย', icon: HeartCrack }, { name: 'แฟนเก่า', icon: HeartCrack }, { name: 'คนที่ชอบ', icon: MessageCircleHeart }, { name: 'เคะ', icon: ArrowDown }, { name: 'เมะ', icon: ArrowUp }],
@@ -89,7 +87,7 @@ const formSchema = z.object({
   history: z.string().max(4096, 'ประวัติตัวละครต้องไม่เกิน 4096 ตัวอักษร').optional(),
   visibility: z.enum(['public', 'private']).default('public'),
   tags: z.array(z.string()).optional(),
-  avatarUrl: z.string().optional(),
+  avatarUrl: z.string().url('กรุณากรอก URL ที่ถูกต้อง').optional().or(z.literal('')),
 });
 
 export default function EditCharacterPage() {
@@ -100,7 +98,6 @@ export default function EditCharacterPage() {
   
   const [character, setCharacter] = React.useState<Character | null>(null);
   const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
-  const [isGeneratingImage, setIsGeneratingImage] = React.useState(false);
   const [avatarPreview, setAvatarPreview] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -167,37 +164,15 @@ export default function EditCharacterPage() {
     form.setValue('tags', selectedTags);
   }, [selectedTags, form]);
 
-
-  const handleGenerateImage = async () => {
-    setIsGeneratingImage(true);
-    setAvatarPreview(null);
-    try {
-      const currentValues = form.getValues();
-      const input: GenerateImageInput = {
-        prompt: `อนิเมะ, ${currentValues.name}, ${currentValues.tagline}, ${currentValues.description}, ${selectedTags.join(', ')}`
-      };
-      const result = await generateImage(input);
-      if (result.imageUrl) {
-        setAvatarPreview(result.imageUrl);
-        form.setValue('avatarUrl', result.imageUrl);
-        toast({
-          title: 'สร้างรูปภาพสำเร็จ!',
-          description: 'รูปโปรไฟล์ใหม่พร้อมใช้งานแล้ว',
-        });
-      } else {
-        throw new Error('Image URL is missing');
+  React.useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'avatarUrl') {
+        setAvatarPreview(value.avatarUrl || null);
       }
-    } catch (error) {
-      console.error(error);
-      toast({
-        variant: 'destructive',
-        title: 'เกิดข้อผิดพลาด',
-        description: 'ไม่สามารถสร้างรูปภาพได้ โปรดลองอีกครั้ง',
-      });
-    } finally {
-      setIsGeneratingImage(false);
-    }
-  };
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
+
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if(!characterId) return;
@@ -268,13 +243,8 @@ export default function EditCharacterPage() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                       <div className="aspect-square w-full rounded-2xl bg-rose-50/50 flex items-center justify-center overflow-hidden border-2 border-dashed border-rose-200">
-                        {isGeneratingImage ? (
-                          <div className="flex flex-col items-center gap-2 text-rose-600">
-                            <Loader2 className="w-10 h-10 animate-spin text-rose-500"/>
-                            <p>กำลังสร้างรูปภาพ...</p>
-                          </div>
-                        ) : avatarPreview ? (
-                           <Image src={avatarPreview} alt="Generated Avatar" width={400} height={400} className="object-cover w-full h-full" />
+                         {avatarPreview ? (
+                           <Image src={avatarPreview} alt="Avatar Preview" width={400} height={400} className="object-cover w-full h-full" />
                         ) : (
                            <div className="text-center text-rose-400 p-4 flex flex-col items-center justify-center">
                             <ImageIcon className="w-16 h-16 mx-auto mb-4 text-rose-200" />
@@ -282,10 +252,19 @@ export default function EditCharacterPage() {
                           </div>
                         )}
                       </div>
-                      <Button type="button" onClick={handleGenerateImage} disabled={isGeneratingImage} className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold shadow-md hover:scale-105 transition-transform rounded-xl py-3">
-                        {isGeneratingImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                        <span>AI สร้างรูปภาพใหม่ (ฟรี)</span>
-                      </Button>
+                       <FormField
+                          control={form.control}
+                          name="avatarUrl"
+                          render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>URL รูปโปรไฟล์ (ไม่บังคับ)</FormLabel>
+                              <FormControl>
+                                <Input placeholder="https://example.com/image.png" {...field} className="focus:ring-rose-500 focus:border-rose-500 transition-all duration-300 rounded-lg border-rose-200/80"/>
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                          )}
+                      />
                   </CardContent>
               </Card>
             </div>
