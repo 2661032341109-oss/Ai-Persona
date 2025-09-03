@@ -76,7 +76,6 @@ export async function addCharacter(characterData: Omit<Character, 'id' | 'create
     likeCount: 0,
     chatCount: 0,
     messageCount: 0,
-    // ensure avatarUrl is not undefined
     avatarUrl: characterData.avatarUrl || `https://picsum.photos/seed/${encodeURIComponent(characterData.name)}/400/400`,
   };
   const docRef = await addDoc(charactersCollection, newCharacterData);
@@ -100,13 +99,19 @@ export async function updateCharacter(id:string, characterData: Partial<Omit<Cha
     return { id: updatedDocSnap.id, ...updatedDocSnap.data() } as Character;
 }
 
-export async function deleteCharacter(id: string): Promise<void> {
-    const characterDoc = doc(db, 'characters', id);
-    await deleteDoc(characterDoc);
-    // Also delete associated conversation subcollection
-    await deleteConversation(id); 
-    revalidatePaths(id);
-    console.log(`Character ${id} and their conversation have been deleted.`);
+export async function deleteCharacter(id: string): Promise<{ success: boolean, error?: string }> {
+    try {
+        const characterDoc = doc(db, 'characters', id);
+        await deleteDoc(characterDoc);
+        // Also delete associated conversation subcollection
+        await deleteConversation(id); 
+        revalidatePaths(id);
+        console.log(`Character ${id} and their conversation have been deleted.`);
+        return { success: true };
+    } catch (e: any) {
+        console.error(`Failed to delete character ${id}:`, e);
+        return { success: false, error: e.message };
+    }
 }
 
 export async function getCharactersWithLastMessage(): Promise<(Character & { lastMessage?: string })[]> {

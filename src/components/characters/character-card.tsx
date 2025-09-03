@@ -14,7 +14,7 @@ import {
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreVertical, Trash2, Edit } from 'lucide-react';
+import { MoreVertical, Trash2, Edit, Loader2 } from 'lucide-react';
 import { deleteCharacter } from '@/lib/characters';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -40,26 +40,29 @@ export function CharacterCard({ character, onCharacterDeleted }: CharacterCardPr
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
+  const [isPending, startTransition] = React.useTransition();
 
-  const handleDelete = async () => {
-      setIsDeleting(true);
-      try {
-          await deleteCharacter(character.id);
+
+  const handleDelete = () => {
+    setIsDeleting(true);
+    startTransition(async () => {
+      const result = await deleteCharacter(character.id);
+      if (result.success) {
           toast({
               title: "ลบตัวละครสำเร็จ",
               description: `ตัวละคร "${character.name}" ถูกลบแล้ว`,
           });
-          onCharacterDeleted();
-          setIsAlertOpen(false); // Close dialog on success
-      } catch (error) {
+          onCharacterDeleted(); // This will trigger a re-fetch in the parent component
+      } else {
           toast({
               variant: "destructive",
               title: "เกิดข้อผิดพลาด",
-              description: "ไม่สามารถลบตัวละครได้",
+              description: result.error || "ไม่สามารถลบตัวละครได้",
           });
-      } finally {
-        setIsDeleting(false);
       }
+      setIsAlertOpen(false);
+      setIsDeleting(false);
+    });
   };
 
 
@@ -86,7 +89,8 @@ export function CharacterCard({ character, onCharacterDeleted }: CharacterCardPr
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                             className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-                            onSelect={() => setIsAlertOpen(true)}
+                            onSelect={(e) => { e.preventDefault(); setIsAlertOpen(true); }}
+                            disabled={isPending || isDeleting}
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
                                 ลบ
@@ -126,8 +130,9 @@ export function CharacterCard({ character, onCharacterDeleted }: CharacterCardPr
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
-                       {isDeleting ? "กำลังลบ..." : "ยืนยันการลบ"}
+                    <AlertDialogAction onClick={handleDelete} disabled={isDeleting || isPending} className="bg-destructive hover:bg-destructive/90">
+                       {(isDeleting || isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                       {(isDeleting || isPending) ? "กำลังลบ..." : "ยืนยันการลบ"}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
