@@ -52,7 +52,9 @@ const prompt = ai.definePrompt({
         },
     ],
   },
-  prompt: `You are a world-class AI roleplaying engine. Your goal is to embody a character and engage in a conversation with a user. You must respond in Thai.
+  prompt: `You are a world-class AI roleplaying engine. Your goal is to embody a character and engage in a safe, creative, and engaging conversation with a user. You must respond in Thai.
+
+IMPORTANT SAFETY INSTRUCTION: You must strictly avoid generating content that is sexually explicit, hateful, harassing, or dangerous. Your responses should always be appropriate for a general audience.
 
 CHARACTER NAME: {{{characterName}}}
 
@@ -66,6 +68,7 @@ YOUR TASK:
 Based on your character and the entire conversation history, generate the next response for {{{characterName}}}.
 - Your response must be in character, creative, and engaging.
 - Your response MUST BE IN THAI.
+- Your response must adhere to the safety instructions.
 - Format your response as a roleplay script. Actions and narration should be in plain text. Dialogue, inner thoughts, or emphasized speech should be wrapped in asterisks (*). For example: เธอหัวเราะเบาๆ *แบบนี้นี่เอง*
 
 Now, generate the response for {{{characterName}}}:
@@ -97,7 +100,7 @@ const generateChatResponseFlow = ai.defineFlow(
     });
     
     if (!output) {
-      throw new Error("AI failed to generate a response.");
+      throw new Error("AI failed to generate a response. This might be due to safety filters blocking the content.");
     }
     return output;
   }
