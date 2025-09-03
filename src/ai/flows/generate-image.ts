@@ -11,7 +11,7 @@ export async function generateImage(input: GenerateImageInput): Promise<Generate
   return generateImageFlow(input);
 }
 
-const prompt = ai.definePrompt({
+const imageGenPrompt = ai.definePrompt({
     name: 'generateImagePrompt',
     input: { schema: GenerateImageInputSchema },
     prompt: `Generate a high-quality, anime-style portrait of a character based on the following description. The image should be suitable for a character profile.
@@ -28,9 +28,10 @@ const generateImageFlow = ai.defineFlow(
     outputSchema: GenerateImageOutputSchema,
   },
   async (input) => {
+    // Explicitly use a model that supports image generation
     const { media } = await ai.generate({
-        model: 'googleai/gemini-1.5-flash-latest',
-        prompt: await prompt.renderText({input}),
+        model: 'googleai/gemini-1.5-flash-latest', 
+        prompt: await imageGenPrompt.renderText({input}),
     });
 
     if (!media || !media.url) {
