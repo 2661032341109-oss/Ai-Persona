@@ -5,6 +5,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 import {
   GenerateChatResponseInputSchema,
   GenerateChatResponseOutputSchema,
@@ -13,6 +14,11 @@ import type {
   GenerateChatResponseInput,
   GenerateChatResponseOutput,
 } from '@/ai/schemas';
+
+// This is the schema the prompt will actually receive after we format the history.
+const FormattedChatInputSchema = GenerateChatResponseInputSchema.extend({
+  conversationHistory: z.string().describe('The pre-formatted history of the conversation so far as a single string.'),
+});
 
 export async function generateChatResponse(
   input: GenerateChatResponseInput
@@ -24,7 +30,7 @@ export async function generateChatResponse(
 
 const prompt = ai.definePrompt({
   name: 'generateChatResponsePrompt',
-  input: { schema: GenerateChatResponseInputSchema },
+  input: { schema: FormattedChatInputSchema },
   output: { schema: GenerateChatResponseOutputSchema },
   prompt: `You are a world-class AI roleplaying engine. Your goal is to embody a character and engage in a conversation with a user. You must respond in Thai.
 
@@ -34,9 +40,7 @@ CHARACTER DESCRIPTION (This defines your personality, background, and how you sh
 {{{characterDescription}}}
 
 CONVERSATION HISTORY (The ongoing conversation between you and the user. The last message is from the user. Your name is "{{{characterName}}}", the user's name is "User"):
-{{#each conversationHistory}}
-{{#if (eq author 'user')}}User: {{text}}{{else}}{{{../characterName}}}: {{text}}{{/if}}
-{{/each}}
+{{{conversationHistory}}}
 
 YOUR TASK:
 Based on your character and the entire conversation history, generate the next response for {{{characterName}}}.
@@ -51,11 +55,27 @@ Now, generate the response for {{{characterName}}}:
 const generateChatResponseFlow = ai.defineFlow(
   {
     name: 'generateChatResponseFlow',
-    inputSchema: GenerateChatResponseInputSchema,
+    inputSchema: GenerateChatResponseInputSchema, // Takes the original, complex schema
     outputSchema: GenerateChatResponseOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
+    // Format the conversation history array into a single string.
+    const formattedHistory = input.conversationHistory
+      .map(msg => {
+        if (msg.author === 'user') {
+          return `User: ${msg.text}`;
+        } else {
+          return `${input.characterName}: ${msg.text}`;
+        }
+      })
+      .join('\n');
+
+    // Call the prompt with the formatted input.
+    const { output } = await prompt({
+      ...input,
+      conversationHistory: formattedHistory,
+    });
+    
     if (!output) {
       throw new Error("AI failed to generate a response.");
     }

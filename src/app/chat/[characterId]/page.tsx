@@ -91,47 +91,51 @@ export default function ChatPage() {
 
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading || !character) return;
-  
+
     const userMessageText = input;
-    const tempUserMessageId = `temp-user-${Date.now()}`;
-    const userMessageForUI: Message = { id: tempUserMessageId, author: 'user', text: userMessageText };
-  
+    const tempUserMessage: Message = {
+      id: `temp-user-${Date.now()}`,
+      author: 'user',
+      text: userMessageText,
+    };
+    
+    // Optimistically update the UI
+    setMessages(prev => [...prev, tempUserMessage]);
     setInput('');
     setIsLoading(true);
-    setMessages(prev => [...prev, userMessageForUI]);
-  
+
     try {
-      // Create conversation history for AI *before* adding the new message to DB
-      // This includes the optimistic message for context
-      const conversationForAI = [...messages, userMessageForUI]
-         .slice(-20) // Get the last 20 messages for context
-         .map(msg => ({ author: msg.author, text: msg.text }));
-  
-      // Get AI response first
+      // Prepare the conversation history for the AI
+      const conversationForAI = [...messages, tempUserMessage]
+        .slice(-20) // Use the last 20 messages for context
+        .map(({ author, text }) => ({ author, text })); // Don't send IDs to AI
+
+      // Call the AI to get a response
       const result = await generateChatResponse({
         characterName: character.name,
         characterDescription: character.description,
         conversationHistory: conversationForAI,
       });
-  
+
       if (!result.response) {
         throw new Error('AI did not return a response.');
       }
-  
-      // Now that we have a successful AI response, save both messages to DB
+      
+      // Save both the user's message and the AI's response to the database
       const userMessageId = await addMessage(character.id, { author: 'user', text: userMessageText });
       const aiMessageId = await addMessage(character.id, { author: 'ai', text: result.response });
-  
+
+      // Create the final messages with real IDs
       const finalUserMessage: Message = { id: userMessageId, author: 'user', text: userMessageText };
       const aiResponseMessage: Message = { id: aiMessageId, author: 'ai', text: result.response };
-  
-      // Update UI by replacing the temp message and adding the final AI message
+
+      // Update the UI by replacing the temporary message and adding the final AI message
       setMessages(prev => [
-          ...prev.filter(msg => msg.id !== tempUserMessageId), 
-          finalUserMessage, 
+          ...prev.filter(msg => msg.id !== tempUserMessage.id),
+          finalUserMessage,
           aiResponseMessage
       ]);
-  
+
     } catch (error) {
       console.error('Error in message send/receive flow:', error);
       toast({
@@ -139,8 +143,8 @@ export default function ChatPage() {
         title: 'เกิดข้อผิดพลาด',
         description: 'ไม่สามารถส่งข้อความได้ โปรดลองอีกครั้ง',
       });
-      // Remove the optimistic user message if an error occurs
-      setMessages(prev => prev.filter(msg => msg.id !== tempUserMessageId));
+      // If an error occurs, remove the optimistic user message from the UI
+      setMessages(prev => prev.filter(msg => msg.id !== tempUserMessage.id));
     } finally {
       setIsLoading(false);
     }
