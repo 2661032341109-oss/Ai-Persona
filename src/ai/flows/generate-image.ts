@@ -8,8 +8,7 @@ import { z } from 'genkit';
 export const GenerateImageInputSchema = z.object({
   prompt: z.string().describe('A text prompt to generate an image from.'),
 });
-export type GenerateImageInput = z\
-  .infer<typeof GenerateImageInputSchema>;
+export type GenerateImageInput = z.infer<typeof GenerateImageInputSchema>;
 
 export const GenerateImageOutputSchema = z.object({
   imageUrl: z.string().describe('The data URI of the generated image.'),
