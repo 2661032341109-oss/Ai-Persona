@@ -17,20 +17,35 @@ import type {
 export async function generateChatResponse(
   input: GenerateChatResponseInput
 ): Promise<GenerateChatResponseOutput> {
-  // Map conversation history to include a boolean for easier template logic
-  const processedInput = {
-    ...input,
-    conversationHistory: input.conversationHistory.map(msg => ({
-      ...msg,
-      isUser: msg.author === 'user',
-    })),
-  };
-  return generateChatResponseFlow(processedInput);
+  // Pre-format the conversation history into a single string.
+  const historyText = input.conversationHistory
+    .map(msg => {
+      return msg.author === 'user'
+        ? `User: ${msg.text}`
+        : `${input.characterName}: ${msg.text}`;
+    })
+    .join('\n');
+
+  // Call the flow with the pre-formatted history.
+  const { response } = await generateChatResponseFlow({
+    characterName: input.characterName,
+    characterDescription: input.characterDescription,
+    // Pass the formatted string instead of the array object.
+    conversationHistory: historyText,
+  });
+
+  return { response };
 }
+
+// Define a new schema for the simplified flow input.
+const SimpleChatInputSchema = GenerateChatResponseInputSchema.extend({
+  conversationHistory: z.string().describe("The pre-formatted history of the conversation as a single text block."),
+});
+
 
 const prompt = ai.definePrompt({
   name: 'generateChatResponsePrompt',
-  input: { schema: GenerateChatResponseInputSchema.extend({}) }, // Allow extra properties like isUser
+  input: { schema: SimpleChatInputSchema },
   output: { schema: GenerateChatResponseOutputSchema },
   prompt: `You are a world-class AI roleplaying engine. Your goal is to embody a character and engage in a conversation with a user. You must respond in Thai.
 
@@ -40,13 +55,7 @@ CHARACTER DESCRIPTION (This defines your personality, background, and how you sh
 {{{characterDescription}}}
 
 CONVERSATION HISTORY (The ongoing conversation between you and the user. The last message is from the user):
-{{#each conversationHistory}}
-{{#if this.isUser}}
-User: {{{this.text}}}
-{{else}}
-{{{../characterName}}}: {{{this.text}}}
-{{/if}}
-{{/each}}
+{{{conversationHistory}}}
 
 YOUR TASK:
 Based on your character and the entire conversation history, generate the next response for {{{characterName}}}.
@@ -61,11 +70,12 @@ Now, generate the response for {{{characterName}}}:
 const generateChatResponseFlow = ai.defineFlow(
   {
     name: 'generateChatResponseFlow',
-    inputSchema: GenerateChatResponseInputSchema.extend({}), // Allow extra properties
+    inputSchema: SimpleChatInputSchema,
     outputSchema: GenerateChatResponseOutputSchema,
   },
   async (input) => {
     const { output } = await prompt(input);
+    // The prompt now directly returns the desired output schema.
     return output!;
   }
 );

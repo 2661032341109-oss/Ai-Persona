@@ -109,10 +109,12 @@ export default function ChatPage() {
         // Add user message to DB and get its real ID
         const finalUserMessageId = await addMessage(character.id, { author: 'user', text: userMessageText });
         // Update UI with the final ID
-        setMessages(prev => prev.map(msg => msg.id === tempUserMessageId ? { ...msg, id: finalUserMessageId } : msg));
+        const finalMessages = messages.map(msg => msg.id === tempUserMessageId ? { ...msg, id: finalUserMessageId } : msg);
+        finalMessages.push({ ...userMessageForUI, id: finalUserMessageId });
+        
+        // Use the updated message list for the AI call
+        const conversationForAI = [...finalMessages.slice(-20)];
 
-        // Generate AI response
-        const conversationForAI = [...messages.slice(-20), { ...userMessageForUI, id: finalUserMessageId }];
         const result = await generateChatResponse({
             characterName: character.name,
             characterDescription: character.description,
@@ -123,7 +125,7 @@ export default function ChatPage() {
             // Add AI response to DB
             const aiResponseId = await addMessage(character.id, { author: 'ai', text: result.response });
             const aiResponseMessage: Message = { id: aiResponseId, author: 'ai', text: result.response };
-            setMessages(prev => [...prev, aiResponseMessage]);
+            setMessages(prev => [...prev, userMessageForUI, aiResponseMessage].filter(m => m.id !== tempUserMessageId));
         } else {
             throw new Error('AI did not return a response.');
         }
