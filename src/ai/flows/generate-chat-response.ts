@@ -16,12 +16,20 @@ import type {
 export async function generateChatResponse(
   input: GenerateChatResponseInput
 ): Promise<GenerateChatResponseOutput> {
-  return generateChatResponseFlow(input);
+  // Map conversation history to include a boolean for easier template logic
+  const processedInput = {
+    ...input,
+    conversationHistory: input.conversationHistory.map(msg => ({
+      ...msg,
+      isUser: msg.author === 'user',
+    })),
+  };
+  return generateChatResponseFlow(processedInput);
 }
 
 const prompt = ai.definePrompt({
   name: 'generateChatResponsePrompt',
-  input: { schema: GenerateChatResponseInputSchema },
+  input: { schema: GenerateChatResponseInputSchema.extend({}) }, // Allow extra properties like isUser
   output: { schema: GenerateChatResponseOutputSchema },
   prompt: `You are a world-class AI roleplaying engine. Your goal is to embody a character and engage in a conversation with a user.
 
@@ -32,7 +40,7 @@ CHARACTER DESCRIPTION (This defines your personality, background, and how you sh
 
 CONVERSATION HISTORY (The ongoing conversation between you and the user):
 {{#each conversationHistory}}
-{{#if (eq this.author 'user')}}
+{{#if this.isUser}}
 User: {{{text}}}
 {{else}}
 {{characterName}}: {{{text}}}
@@ -52,7 +60,7 @@ Now, generate the response for {{characterName}}:
 const generateChatResponseFlow = ai.defineFlow(
   {
     name: 'generateChatResponseFlow',
-    inputSchema: GenerateChatResponseInputSchema,
+    inputSchema: GenerateChatResponseInputSchema.extend({}), // Allow extra properties
     outputSchema: GenerateChatResponseOutputSchema,
   },
   async (input) => {
