@@ -36,6 +36,7 @@ import { Separator } from '@/components/ui/separator';
 import React, { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { SettingsDialog } from '@/components/settings-dialog';
+import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger, SidebarFooter } from '@/components/ui/sidebar';
 
 
 type CharacterWithLastMessage = Character & { lastMessage?: string };
@@ -67,56 +68,68 @@ export default function HomePage() {
 
 
   return (
+    <SidebarProvider>
     <div className="flex min-h-screen bg-muted/40 font-sans">
-      <aside className="w-64 bg-background border-r p-4 flex-col hidden md:flex">
-        <div className="flex items-center gap-2 mb-6">
-          <Sparkles className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">Khui AI</h1>
-        </div>
-        <div className="mb-4">
-           <Button variant="outline" className="w-full justify-center gap-2">
-            <Coins className="text-amber-500"/>
-            เช็คอินรายวัน
-          </Button>
-        </div>
-
-        <nav className="flex-1 space-y-2">
-          <Button variant="ghost" className="w-full justify-start gap-2">
-            <Home />
-            หน้าหลัก
-          </Button>
-          <Button variant="secondary" className="w-full justify-start gap-2" asChild>
-            <Link href="/character/create">
-                <PlusCircle />
-                สร้างตัวละคร
-            </Link>
-          </Button>
-          <Button variant="ghost" className="w-full justify-start gap-2">
-            <MessageSquare />
-            แชทล่าสุด
-          </Button>
-          <Button variant="ghost" className="w-full justify-start gap-2">
-            <Book />
-            คลังตัวละคร
-          </Button>
-        </nav>
-        <div className="mt-auto">
-          <div className="text-sm text-muted-foreground space-y-1">
-            <p className="hover:text-primary cursor-pointer">Discord</p>
-            <p className="hover:text-primary cursor-pointer">Facebook</p>
-            <p className="hover:text-primary cursor-pointer">Linktree</p>
-          </div>
-          <Separator className="my-2" />
-          <p className="text-xs text-muted-foreground">
-            ข้อกำหนด & ความเป็นส่วนตัว
-          </p>
-        </div>
-      </aside>
+        <Sidebar collapsible="icon" className="group-data-[variant=floating]:-ml-2 md:group-data-[variant=floating]:-ml-0">
+            <SidebarHeader>
+                 <div className="flex items-center gap-2">
+                    <Sparkles className="h-6 w-6 text-primary" />
+                    <h1 className="text-2xl font-bold group-data-[collapsible=icon]:hidden">Khui AI</h1>
+                </div>
+            </SidebarHeader>
+            <SidebarContent>
+                 <div className="mb-4 p-2">
+                    <Button variant="outline" className="w-full justify-center gap-2">
+                        <Coins className="text-amber-500"/>
+                        <span className="group-data-[collapsible=icon]:hidden">เช็คอินรายวัน</span>
+                    </Button>
+                </div>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                         <SidebarMenuButton tooltip="หน้าหลัก" isActive>
+                            <Home />
+                             <span className="group-data-[collapsible=icon]:hidden">หน้าหลัก</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                     <SidebarMenuItem>
+                        <SidebarMenuButton tooltip="สร้างตัวละคร" asChild>
+                             <Link href="/character/create">
+                                <PlusCircle />
+                                <span className="group-data-[collapsible=icon]:hidden">สร้างตัวละคร</span>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                     <SidebarMenuItem>
+                        <SidebarMenuButton tooltip="แชทล่าสุด">
+                            <MessageSquare />
+                             <span className="group-data-[collapsible=icon]:hidden">แชทล่าสุด</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                     <SidebarMenuItem>
+                        <SidebarMenuButton tooltip="คลังตัวละคร">
+                            <Book />
+                            <span className="group-data-[collapsible=icon]:hidden">คลังตัวละคร</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarContent>
+             <SidebarFooter className="group-data-[collapsible=icon]:hidden">
+                <div className="text-sm text-muted-foreground space-y-1">
+                    <p className="hover:text-primary cursor-pointer">Discord</p>
+                    <p className="hover:text-primary cursor-pointer">Facebook</p>
+                    <p className="hover:text-primary cursor-pointer">Linktree</p>
+                </div>
+                <Separator className="my-2" />
+                <p className="text-xs text-muted-foreground">
+                    ข้อกำหนด & ความเป็นส่วนตัว
+                </p>
+            </SidebarFooter>
+        </Sidebar>
 
       <div className="flex-1 flex flex-col">
-        <header className="flex items-center justify-between p-4 border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
-          <div className='md:w-64'></div>
-          <div className="flex-1 max-w-2xl">
+        <header className="flex items-center justify-between p-4 border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10 h-14">
+           <SidebarTrigger className="md:hidden"/>
+          <div className="flex-1 max-w-2xl mx-auto">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
@@ -132,7 +145,7 @@ export default function HomePage() {
               <Coins className="text-amber-500" />
               24
             </Badge>
-            <Button className="bg-gradient-to-r from-primary to-accent text-white">เติมคอยน์</Button>
+            <Button className="bg-gradient-to-r from-primary to-accent text-white hidden sm:flex">เติมคอยน์</Button>
             <SettingsDialog />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -173,7 +186,7 @@ export default function HomePage() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
             {filteredCharacters.map((character) => (
               <CharacterCard key={character.id} character={character} onCharacterDeleted={handleCharacterDeleted} />
             ))}
@@ -181,5 +194,6 @@ export default function HomePage() {
         </main>
       </div>
     </div>
+    </SidebarProvider>
   );
 }

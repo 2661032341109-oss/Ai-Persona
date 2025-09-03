@@ -12,6 +12,7 @@ import { TypingIndicator } from '@/components/chat/typing-indicator';
 import { generateChatResponse } from '@/ai/flows/generate-chat-response';
 import { useToast } from '@/hooks/use-toast';
 import { getConversation, saveConversation } from '@/lib/conversations';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 
 export type Message = {
@@ -141,6 +142,7 @@ export default function ChatPage() {
   }
 
   return (
+    <SidebarProvider>
     <ChatLayout character={character}>
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50">
         {messages.map((msg) => (
@@ -158,5 +160,6 @@ export default function ChatPage() {
         />
       </div>
     </ChatLayout>
+    </SidebarProvider>
   );
 }
