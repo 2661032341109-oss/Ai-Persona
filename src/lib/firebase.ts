@@ -5,15 +5,14 @@ import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 
 // Your web app's Firebase configuration
-// IMPORTANT: Replace with your actual Firebase config object
-// You can get this from the Firebase console for your web app.
+// IMPORTANT: This object is automatically generated and should not be modified.
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  "projectId": "khui-companion",
+  "appId": "1:370708290195:web:f81be08bc817c2fc128b66",
+  "storageBucket": "khui-companion.appspot.com",
+  "apiKey": "AIzaSyB-GvxNCHsG2mnnFEyc5NOpjOWGqp-g_x4",
+  "authDomain": "khui-companion.firebaseapp.com",
+  "messagingSenderId": "370708290195"
 };
 
 // Initialize Firebase

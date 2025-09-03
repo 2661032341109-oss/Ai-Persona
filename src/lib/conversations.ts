@@ -11,6 +11,7 @@ import {
   serverTimestamp,
   writeBatch,
   Timestamp,
+  doc,
 } from 'firebase/firestore';
 import type { Message as ChatMessage } from '@/app/chat/[characterId]/page';
 import { revalidatePath } from 'next/cache';

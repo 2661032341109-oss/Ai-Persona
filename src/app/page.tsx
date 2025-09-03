@@ -46,7 +46,7 @@ export default function HomePage() {
     setIsLoading(true);
     try {
         const chars = await getCharactersWithLastMessage();
-        setCharacters(chars.reverse());
+        setCharacters(chars);
     } catch (error) {
         console.error("Failed to fetch characters:", error);
         // Optionally, show a toast to the user
