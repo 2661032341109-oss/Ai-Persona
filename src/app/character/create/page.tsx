@@ -103,6 +103,8 @@ export default function CreateCharacterPage() {
   const [isGeneratingImage, setIsGeneratingImage] = React.useState(false);
   const [avatarPreview, setAvatarPreview] = React.useState<string | null>(null);
   const [draft, setDraft] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -221,23 +223,35 @@ export default function CreateCharacterPage() {
     }
   };
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    addCharacter({
-        name: values.name,
-        tagline: values.tagline,
-        description: values.description,
-        greeting: values.greeting,
-        history: values.history || '',
-        visibility: values.visibility,
-        tags: values.tags,
-        avatarUrl: values.avatarUrl || `https://picsum.photos/seed/${encodeURIComponent(values.name)}/400/400`,
-    });
-    
-    toast({
-      title: 'สร้างตัวละครสำเร็จ!',
-      description: `${values.name} ของคุณถูกสร้างขึ้นเรียบร้อยแล้ว`,
-    });
-    router.push('/');
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
+    try {
+        await addCharacter({
+            name: values.name,
+            tagline: values.tagline,
+            description: values.description,
+            greeting: values.greeting,
+            history: values.history || '',
+            visibility: values.visibility,
+            tags: values.tags,
+            avatarUrl: values.avatarUrl || `https://picsum.photos/seed/${encodeURIComponent(values.name)}/400/400`,
+        });
+        
+        toast({
+        title: 'สร้างตัวละครสำเร็จ!',
+        description: `${values.name} ของคุณถูกสร้างขึ้นเรียบร้อยแล้ว`,
+        });
+        router.push('/');
+    } catch (error) {
+        console.error("Failed to create character:", error);
+        toast({
+            variant: "destructive",
+            title: "เกิดข้อผิดพลาด",
+            description: "ไม่สามารถสร้างตัวละครได้ โปรดลองอีกครั้ง"
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   }
 
   return (
@@ -525,9 +539,9 @@ export default function CreateCharacterPage() {
           </div>
            
             <div className="flex justify-center mt-8">
-                <Button type="submit" size="lg" className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-bold shadow-lg hover:scale-110 transition-transform rounded-full px-12 py-6 text-lg">
-                  <Rocket className="mr-2 h-5 w-5"/>
-                  สร้างตัวละคร
+                <Button type="submit" size="lg" disabled={isSubmitting} className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-bold shadow-lg hover:scale-110 transition-transform rounded-full px-12 py-6 text-lg">
+                  {isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Rocket className="mr-2 h-5 w-5"/>}
+                  {isSubmitting ? 'กำลังสร้าง...' : 'สร้างตัวละคร'}
                 </Button>
             </div>
              <p className="text-xs text-muted-foreground text-center mt-4">

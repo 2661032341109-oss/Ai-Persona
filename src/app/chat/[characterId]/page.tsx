@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback }from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import type { Character } from '@/lib/characters';
 import { getCharacterById } from '@/lib/characters';
@@ -11,7 +11,7 @@ import { ChatMessage } from '@/components/chat/chat-message';
 import { TypingIndicator } from '@/components/chat/typing-indicator';
 import { generateChatResponse } from '@/ai/flows/generate-chat-response';
 import { useToast } from '@/hooks/use-toast';
-import { getConversation, saveConversation } from '@/lib/conversations';
+import { getConversation, addMessage } from '@/lib/conversations';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Loader2 } from 'lucide-react';
 
@@ -41,14 +41,13 @@ export default function ChatPage() {
       if (history.length > 0) {
           setMessages(history);
       } else {
-          // Start with only the character's greeting if no history
-          const greetingMessage: Message = {
-            id: 'greeting-' + char.id,
+          // If no history, create and add the greeting message to the DB
+          const greetingMessage: Omit<Message, 'id'> = {
             author: 'ai',
             text: char.greeting,
           };
-          setMessages([greetingMessage]);
-          await saveConversation(char.id, [greetingMessage]);
+          const newId = await addMessage(char.id, greetingMessage);
+          setMessages([{ ...greetingMessage, id: newId }]);
       }
   }, []);
 
@@ -93,51 +92,53 @@ export default function ChatPage() {
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading || !character) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
+    const userMessageText = input;
+    setInput(''); // Clear input immediately
+
+    // Optimistically add user message to the UI
+    const tempUserMessageId = `temp-user-${Date.now()}`;
+    const userMessageForUI: Message = {
+      id: tempUserMessageId,
       author: 'user',
-      text: input,
+      text: userMessageText,
     };
-    
-    const newMessages = [...messages, userMessage];
-    setMessages(newMessages);
-    setInput('');
+    setMessages(prev => [...prev, userMessageForUI]);
     setIsLoading(true);
     
-    // Optimistically save user message
-    await saveConversation(character.id, newMessages);
-
     try {
-      const result = await generateChatResponse({
-        characterName: character.name,
-        characterDescription: character.description,
-        conversationHistory: newMessages.slice(-20).map(msg => ({ author: msg.author, text: msg.text })), // Send last 20 messages for context
-      });
+        // Add user message to DB and get its real ID
+        const finalUserMessageId = await addMessage(character.id, { author: 'user', text: userMessageText });
+        // Update UI with the final ID
+        setMessages(prev => prev.map(msg => msg.id === tempUserMessageId ? { ...msg, id: finalUserMessageId } : msg));
 
-      if (result.response) {
-        const aiResponse: Message = {
-          id: (Date.now() + 1).toString(),
-          author: 'ai',
-          text: result.response,
-        };
-        const finalMessages = [...newMessages, aiResponse];
-        setMessages(finalMessages);
-        await saveConversation(character.id, finalMessages);
-      } else {
-        throw new Error('AI did not return a response.');
-      }
+        // Generate AI response
+        const conversationForAI = [...messages.slice(-20), { ...userMessageForUI, id: finalUserMessageId }];
+        const result = await generateChatResponse({
+            characterName: character.name,
+            characterDescription: character.description,
+            conversationHistory: conversationForAI.map(msg => ({ author: msg.author, text: msg.text })),
+        });
+
+        if (result.response) {
+            // Add AI response to DB
+            const aiResponseId = await addMessage(character.id, { author: 'ai', text: result.response });
+            const aiResponseMessage: Message = { id: aiResponseId, author: 'ai', text: result.response };
+            setMessages(prev => [...prev, aiResponseMessage]);
+        } else {
+            throw new Error('AI did not return a response.');
+        }
+
     } catch (error) {
-      console.error('Error generating chat response:', error);
-      toast({
-        variant: 'destructive',
-        title: 'เกิดข้อผิดพลาด',
-        description: 'ไม่สามารถสร้างคำตอบได้ โปรดลองอีกครั้งในภายหลัง',
-      });
-      // Revert to previous state if AI fails
-      setMessages(messages);
-      await saveConversation(character.id, messages);
+        console.error('Error in message send/receive flow:', error);
+        toast({
+            variant: 'destructive',
+            title: 'เกิดข้อผิดพลาด',
+            description: 'ไม่สามารถส่งข้อความได้ โปรดลองอีกครั้ง',
+        });
+        // Remove the optimistic user message if an error occurs
+        setMessages(prev => prev.filter(msg => msg.id !== tempUserMessageId));
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
   };
   

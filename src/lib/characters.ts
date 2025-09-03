@@ -1,9 +1,20 @@
-
 'use server';
 
-import fs from 'fs/promises';
-import path from 'path';
-import { getConversation, deleteConversation } from './conversations';
+import { db } from '@/lib/firebase';
+import {
+  collection,
+  query,
+  getDocs,
+  doc,
+  getDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  orderBy,
+  limit,
+  writeBatch,
+} from 'firebase/firestore';
+import { getConversation, deleteConversation, getLastMessage } from './conversations';
 import { revalidatePath } from 'next/cache';
 
 export type Character = {
@@ -16,117 +27,88 @@ export type Character = {
   visibility: 'public' | 'private';
   tags?: string[];
   avatarUrl?: string;
-  // New fields from the user request
   creator?: string;
-  createdAt?: string;
+  createdAt: string; // ISO 8601 date string
   likeCount?: number;
   chatCount?: number;
   messageCount?: number;
-  contentWarning?: string;
-  versions?: any[]; // Define a proper type if versioning is implemented
-  alternativeImages?: string[];
-  supportingCharacters?: any[]; // Define a proper type later
-  initialUserRole?: {
-    avatarUrl?: string;
-    name?: string;
-    description?: string;
-  };
-  initialScenario?: {
-    name?: string;
-    description?: string;
-  };
 };
 
-const charactersFilePath = path.join(process.cwd(), 'src', 'lib', 'characters.json');
+const charactersCollection = collection(db, 'characters');
 
-async function readCharactersFromFile(): Promise<Character[]> {
-  try {
-    // Check if the file exists. If not, return an empty array and don't create the file yet.
-    await fs.access(charactersFilePath);
-    const jsonData = await fs.readFile(charactersFilePath, 'utf-8');
-    // If the file is empty or just whitespace, return an empty array.
-    if (!jsonData.trim()) {
-      return [];
-    }
-    return JSON.parse(jsonData);
-  } catch (error: any) {
-    // If the error is that the file doesn't exist, it's a valid state.
-    if (error.code === 'ENOENT') {
-      return [];
-    }
-    // For other errors, log them as they might be actual issues.
-    console.error('Error reading characters file:', error);
-    return [];
-  }
-}
-
-async function writeCharactersToFile(characters: Character[]) {
-  try {
-    await fs.writeFile(charactersFilePath, JSON.stringify(characters, null, 2), 'utf-8');
-    revalidatePath('/'); // Revalidate the home page to show new/updated characters
+async function revalidateAllPaths() {
+    revalidatePath('/');
+    revalidatePath('/character/create');
     revalidatePath('/character/edit/[characterId]');
     revalidatePath('/chat/[characterId]');
-
-  } catch (error) {
-    console.error('Error writing characters file:', error);
-  }
 }
 
+
 export async function getCharacters(): Promise<Character[]> {
-  const characters = await readCharactersFromFile();
+  const q = query(charactersCollection, orderBy('createdAt', 'desc'));
+  const querySnapshot = await getDocs(q);
+  const characters = querySnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Character[];
   return characters;
 }
 
-export async function getCharacterById(id: string): Promise<Character | undefined> {
-  const characters = await getCharacters();
-  return characters.find((char) => char.id === id);
+export async function getCharacterById(id: string): Promise<Character | null> {
+  const characterDoc = doc(db, 'characters', id);
+  const docSnap = await getDoc(characterDoc);
+
+  if (docSnap.exists()) {
+    return { id: docSnap.id, ...docSnap.data() } as Character;
+  } else {
+    console.warn(`Character with id ${id} not found.`);
+    return null;
+  }
 }
 
-export async function addCharacter(character: Omit<Character, 'id' | 'createdAt'>): Promise<Character> {
-  const characters = await readCharactersFromFile();
-  const newCharacter: Character = {
-    id: String(Date.now()), // Use timestamp for unique ID
+export async function addCharacter(characterData: Omit<Character, 'id' | 'createdAt'>): Promise<Character> {
+  const newCharacterData = {
+    ...characterData,
     createdAt: new Date().toISOString(),
-    ...character,
+    likeCount: 0,
+    chatCount: 0,
+    messageCount: 0,
   };
-  const updatedCharacters = [...characters, newCharacter];
-  await writeCharactersToFile(updatedCharacters);
-  return newCharacter;
+  const docRef = await addDoc(charactersCollection, newCharacterData);
+  await revalidateAllPaths();
+  return { id: docRef.id, ...newCharacterData };
 }
 
-export async function updateCharacter(id: string, updatedCharacterData: Omit<Character, 'id' | 'createdAt'>): Promise<Character | null> {
-    const characters = await readCharactersFromFile();
-    const characterIndex = characters.findIndex((char) => char.id === id);
+export async function updateCharacter(id:string, characterData: Partial<Omit<Character, 'id' | 'createdAt'>>): Promise<Character | null> {
+    const characterDoc = doc(db, 'characters', id);
+    const docSnap = await getDoc(characterDoc);
 
-    if (characterIndex === -1) {
+    if (!docSnap.exists()) {
+        console.error(`Cannot update: Character with id ${id} not found.`);
         return null;
     }
+    
+    await updateDoc(characterDoc, characterData);
+    await revalidateAllPaths();
 
-    const originalCharacter = characters[characterIndex];
-    const updatedCharacter: Character = {
-        ...originalCharacter, // Retain original id, createdAt
-        ...updatedCharacterData, // Apply new data
-    };
-
-    characters[characterIndex] = updatedCharacter;
-    await writeCharactersToFile(characters);
-    return updatedCharacter;
+    const updatedDocSnap = await getDoc(characterDoc);
+    return { id: updatedDocSnap.id, ...updatedDocSnap.data() } as Character;
 }
 
-
 export async function deleteCharacter(id: string): Promise<void> {
-    const characters = await readCharactersFromFile();
-    const updatedCharacters = characters.filter((char) => char.id !== id);
-    await writeCharactersToFile(updatedCharacters);
-    await deleteConversation(id); // Also delete associated conversation
+    const characterDoc = doc(db, 'characters', id);
+    await deleteDoc(characterDoc);
+    // Also delete associated conversation subcollection
+    await deleteConversation(id); 
+    await revalidateAllPaths();
+    console.log(`Character ${id} and their conversation have been deleted.`);
 }
 
 export async function getCharactersWithLastMessage(): Promise<(Character & { lastMessage?: string })[]> {
     const characters = await getCharacters();
     const charactersWithLastMessage = await Promise.all(
         characters.map(async (character) => {
-            const conversation = await getConversation(character.id);
-            const lastMessage = conversation.length > 1 ? conversation[conversation.length - 1] : null; // Get last real message, not greeting
+            const lastMessage = await getLastMessage(character.id);
             return {
                 ...character,
                 lastMessage: lastMessage?.text,

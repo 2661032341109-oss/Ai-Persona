@@ -47,10 +47,8 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react';
 import React from 'react';
-import { generateCharacterDetails } from '@/ai/flows/generate-character-details';
 import { generateImage } from '@/ai/flows/generate-image';
-import { generateCharacterFromDraft } from '@/ai/flows/generate-character-from-draft';
-import type { GenerateCharacterDetailsInput, GenerateImageInput, GenerateCharacterFromDraftInput } from '@/ai/schemas';
+import type { GenerateImageInput } from '@/ai/schemas';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const tagsConfig = {
@@ -102,13 +100,10 @@ export default function EditCharacterPage() {
   
   const [character, setCharacter] = React.useState<Character | null>(null);
   const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
-  const [isGeneratingCharacter, setIsGeneratingCharacter] = React.useState(false);
-  const [isGeneratingFromDraft, setIsGeneratingFromDraft] = React.useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = React.useState(false);
   const [avatarPreview, setAvatarPreview] = React.useState<string | null>(null);
-  const [draft, setDraft] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(true);
-
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -129,28 +124,38 @@ export default function EditCharacterPage() {
 
     const fetchCharacter = async () => {
       setIsLoading(true);
-      const char = await getCharacterById(characterId);
-      if (char) {
-        setCharacter(char);
-        form.reset({
-            name: char.name,
-            tagline: char.tagline,
-            description: char.description,
-            greeting: char.greeting,
-            history: char.history,
-            visibility: char.visibility,
-            tags: char.tags,
-            avatarUrl: char.avatarUrl,
-        });
-        setSelectedTags(char.tags || []);
-        setAvatarPreview(char.avatarUrl || null);
-      } else {
-        toast({
-            variant: 'destructive',
-            title: 'ไม่พบตัวละคร',
-            description: 'ไม่พบตัวละครที่คุณต้องการแก้ไข',
-        })
-        router.push('/');
+      try {
+        const char = await getCharacterById(characterId);
+        if (char) {
+          setCharacter(char);
+          form.reset({
+              name: char.name,
+              tagline: char.tagline,
+              description: char.description,
+              greeting: char.greeting,
+              history: char.history,
+              visibility: char.visibility,
+              tags: char.tags,
+              avatarUrl: char.avatarUrl,
+          });
+          setSelectedTags(char.tags || []);
+          setAvatarPreview(char.avatarUrl || null);
+        } else {
+          toast({
+              variant: 'destructive',
+              title: 'ไม่พบตัวละคร',
+              description: 'ไม่พบตัวละครที่คุณต้องการแก้ไข',
+          })
+          router.push('/');
+        }
+      } catch (error) {
+          console.error("Failed to fetch character for editing:", error);
+           toast({
+              variant: 'destructive',
+              title: 'เกิดข้อผิดพลาด',
+              description: 'ไม่สามารถโหลดข้อมูลตัวละครได้',
+          })
+          router.push('/');
       }
       setIsLoading(false);
     };
@@ -196,23 +201,35 @@ export default function EditCharacterPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if(!characterId) return;
+    setIsSubmitting(true);
     
-    await updateCharacter(characterId, {
-        name: values.name,
-        tagline: values.tagline,
-        description: values.description,
-        greeting: values.greeting,
-        history: values.history || '',
-        visibility: values.visibility,
-        tags: values.tags,
-        avatarUrl: values.avatarUrl || `https://picsum.photos/seed/${encodeURIComponent(values.name)}/400/400`,
-    });
-    
-    toast({
-      title: 'แก้ไขตัวละครสำเร็จ!',
-      description: `ข้อมูลของ ${values.name} ได้รับการอัปเดตแล้ว`,
-    });
-    router.push('/');
+    try {
+        await updateCharacter(characterId, {
+            name: values.name,
+            tagline: values.tagline,
+            description: values.description,
+            greeting: values.greeting,
+            history: values.history || '',
+            visibility: values.visibility,
+            tags: values.tags,
+            avatarUrl: values.avatarUrl || `https://picsum.photos/seed/${encodeURIComponent(values.name)}/400/400`,
+        });
+        
+        toast({
+        title: 'แก้ไขตัวละครสำเร็จ!',
+        description: `ข้อมูลของ ${values.name} ได้รับการอัปเดตแล้ว`,
+        });
+        router.push('/');
+    } catch(error) {
+        console.error("Failed to update character:", error);
+        toast({
+            variant: "destructive",
+            title: "เกิดข้อผิดพลาด",
+            description: "ไม่สามารถบันทึกการเปลี่ยนแปลงได้ โปรดลองอีกครั้ง"
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   }
   
   if (isLoading) {
@@ -452,7 +469,7 @@ export default function EditCharacterPage() {
                               <FormControl>
                               <RadioGroup
                                   onValueChange={field.onChange}
-                                  defaultValue={field.value}
+                                  value={field.value}
                                   className="flex flex-col space-y-1"
                               >
                                   <FormItem className="flex items-center space-x-3 space-y-0">
@@ -483,9 +500,9 @@ export default function EditCharacterPage() {
           </div>
            
             <div className="flex justify-center mt-8">
-                <Button type="submit" size="lg" className="bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-bold shadow-lg hover:scale-110 transition-transform rounded-full px-12 py-6 text-lg">
-                  <Check className="mr-2 h-5 w-5"/>
-                  บันทึกการเปลี่ยนแปลง
+                <Button type="submit" size="lg" disabled={isSubmitting} className="bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-bold shadow-lg hover:scale-110 transition-transform rounded-full px-12 py-6 text-lg">
+                  {isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Check className="mr-2 h-5 w-5"/>}
+                  {isSubmitting ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}
                 </Button>
             </div>
              <p className="text-xs text-muted-foreground text-center mt-4">
