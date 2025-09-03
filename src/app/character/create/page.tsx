@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { addCharacter } from '@/lib/characters';
-import { ArrowLeft, Bot, ImageIcon, Loader2, Sparkles, Wand2, X, PlusCircle, Trash2, UploadCloud, Flag, Shield, Eye, Tv, BookText, Gamepad2, Columns3, Rabbit, Smile, Mic, Star, Dumbbell, Handshake, Speech, History, SquarePlay, TvMinimal, Sticker, Globe, PocketKnife, CodeXml, Wrench, Stethoscope, School, Palette, ChefHat, Plane, Camera, Music2, Swords, BookHeart, Users, Crown, Skull, GraduationCap, ArrowUp, ArrowDown, HeartCrack, MessageCircleHeart, Footprints, WandSparkles, House, User, Cherry, Grape, Rocket, Clapperboard, FileText } from 'lucide-react';
+import { ArrowLeft, Bot, ImageIcon, Loader2, Sparkles, Wand2, X, PlusCircle, Trash2, UploadCloud, Flag, Shield, Eye, Tv, BookText, Gamepad2, Columns3, Rabbit, Smile, Mic, Star, Dumbbell, Handshake, Speech, History, SquarePlay, TvMinimal, Sticker, Globe, PocketKnife, CodeXml, Wrench, Stethoscope, School, Palette, ChefHat, Plane, Camera, Music2, Swords, BookHeart, Users, Crown, Skull, GraduationCap, ArrowUp, ArrowDown, HeartCrack, MessageCircleHeart, Footprints, WandSparkles, House, User, Cherry, Grape, Rocket, Clapperboard, FileText, PersonStanding, HandHeart, Laugh, Ghost, Frown, CircleHelp, Omega, Glasses, Dog, ScrollText, Bird, Flame, Zap, Mountain, Bug, Ellipsis } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -41,6 +41,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from '@/components/ui/command';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -71,14 +72,14 @@ const tagsConfig = {
     { name: 'ตัวละครมีม', icon: Smile },
     { name: 'ออริจินอล', icon: Bot },
   ],
-   'บทบาท': ['นักแสดง', 'นักร้อง', 'ไอดอล', 'นักกีฬา', 'นักธุรกิจ', 'นักการเมือง', 'บุคคลสำคัญในประวัติศาสตร์', 'ยูทูบเบอร์', 'สตรีมเมอร์', 'วีทูบเบอร์', 'อินฟลูเอนเซอร์เสมือน', 'มาเฟีย', 'ระบบ', 'วิศวะ', 'พ่อหมอ', 'หมอ', 'ครู', 'ศิลปิน', 'เชฟ', 'นักบิน', 'ช่างภาพ', 'นักดนตรี', 'โปรแกรมเมอร์', 'บอดี้การ์ด', 'หุ่นยนต์', 'นักวิทยาศาสตร์', 'นักสืบ', 'ตำรวจ', 'อัศวิน', 'นักบวช', 'แม่ชี', 'พ่อบ้าน', 'เทพเจ้า', 'คนไข้', 'พยาบาล', 'นักบุญ', 'ตัวร้าย', 'ฮีโร่', 'ขุนนาง', 'นักศึกษา', 'จักรพรรดิ', 'พระมเหสี', 'พระสนม', 'รัชทายาท'],
-  'บุคลิกและลักษณะนิสัย': ['โรแมนติก', 'อ่อนโยน', 'ตลก', 'สยองขวัญ', 'ระทึกขวัญ', 'ดราม่า', 'ลึกลับ', 'ซึนเดเระ', 'คูเดเระ', 'ฉลาด', 'ขี้อาย', 'จริงจัง', 'ร่าเริง', 'ซุ่มซ่าม', 'แฟนออกสาว', 'หมาโกลเด้น', 'แมวดำ', 'อีนิกม่า', 'อัลฟ่า', 'เบต้า', 'โอเมก้า', 'เนิร์ด', 'หมาเด็ก', 'หมาแก่', 'ซามอยด์', 'เจ้าเล่ห์'],
-  'ประเภท/องค์ประกอบเรื่อง': ['ไทยโบราณ', 'ผจญภัย', 'แฟนตาซี', 'แอคชัน', 'ชีวิตประจำวัน', 'ยุคกลาง', 'ข้ามมิติ', 'เกิดใหม่', 'ไซไฟ', 'หลังวันสิ้นโลก', 'จีนย้อนยุค'],
-  'เพศและความสัมพันธ์': ['แฟน', 'แต่งงาน', 'ยาโอย', 'ยูริ', 'ชายหญิง', 'ชาย', 'หญิง', 'ไบเซ็กชวล', 'ฟูตะ', 'เฟมบอย', 'แฟนเก่า', 'คนที่ชอบ', 'เคะ', 'เมะ'],
-  'ความสัมพันธ์': ['เพื่อน', 'เพื่อนร่วมห้อง', 'เพื่อนสนิท', 'น้องสาว', 'พี่ชาย', 'แม่', 'พ่อ', 'ลูกสาว', 'ลูกชาย'],
-  'ช่วงอายุ': ['วัยรุ่น', 'ผู้ใหญ่'],
-  'สิ่งมีชีวิตเหนือธรรมชาติ': ['ปีศาจ', 'เทวดา', 'วิญญาณ', 'ซาตาน', 'แม่มด', 'พ่อมด', 'เอลฟ์', 'แวมไพร์', 'มนุษย์หมาป่า', 'ซอมบี้', 'เอเลี่ยน', 'ยมทูต', 'กลายพันธุ์', 'มนุษย์สัตว์', 'เงือก', 'โทรล', 'ยักษ์', 'ก็อบลิน'],
-  'อื่นๆ': ['อื่นๆ']
+   'บทบาท': [{ name: 'นักแสดง', icon: PersonStanding}, { name: 'นักร้อง', icon: Mic }, { name: 'ไอดอล', icon: Star }, { name: 'นักกีฬา', icon: Dumbbell }, { name: 'นักธุรกิจ', icon: Handshake }, { name: 'นักการเมือง', icon: Speech }, { name: 'บุคคลสำคัญในประวัติศาสตร์', icon: History }, { name: 'ยูทูบเบอร์', icon: SquarePlay }, { name: 'สตรีมเมอร์', icon: TvMinimal }, { name: 'วีทูบเบอร์', icon: Sticker }, { name: 'อินฟลูเอนเซอร์เสมือน', icon: Globe }, { name: 'มาเฟีย', icon: PocketKnife }, { name: 'ระบบ', icon: CodeXml }, { name: 'วิศวะ', icon: Wrench }, { name: 'พ่อหมอ', icon: Sparkles }, { name: 'หมอ', icon: Stethoscope }, { name: 'ครู', icon: School }, { name: 'ศิลปิน', icon: Palette }, { name: 'เชฟ', icon: ChefHat }, { name: 'นักบิน', icon: Plane }, { name: 'ช่างภาพ', icon: Camera }, { name: 'นักดนตรี', icon: Music2 }, { name: 'โปรแกรมเมอร์', icon: CodeXml }, { name: 'บอดี้การ์ด', icon: Shield }, { name: 'หุ่นยนต์', icon: Bot }, { name: 'นักวิทยาศาสตร์', icon: GraduationCap }, { name: 'นักสืบ', icon: Eye }, { name: 'ตำรวจ', icon: Shield }, { name: 'อัศวิน', icon: Swords }, { name: 'นักบวช', icon: BookText }, { name: 'แม่ชี', icon: BookHeart }, { name: 'พ่อบ้าน', icon: Users }, { name: 'เทพเจ้า', icon: Crown }, { name: 'คนไข้', icon: Stethoscope }, { name: 'พยาบาล', icon: Stethoscope }, { name: 'นักบุญ', icon: Star }, { name: 'ตัวร้าย', icon: Skull }, { name: 'ฮีโร่', icon: Shield }, { name: 'ขุนนาง', icon: Crown }, { name: 'นักศึกษา', icon: GraduationCap }, { name: 'จักรพรรดิ', icon: Crown }, { name: 'พระมเหสี', icon: Crown }, { name: 'พระสนม', icon: HeartCrack }, { name: 'รัชทายาท', icon: Star }],
+  'บุคลิกและลักษณะนิสัย': [{ name: 'โรแมนติก', icon: MessageCircleHeart }, { name: 'อ่อนโยน', icon: HandHeart }, { name: 'ตลก', icon: Laugh }, { name: 'สยองขวัญ', icon: Ghost }, { name: 'ระทึกขวัญ', icon: Skull }, { name: 'ดราม่า', icon: Frown }, { name: 'ลึกลับ', icon: Eye }, { name: 'ซึนเดเระ', icon: HandHeart }, { name: 'คูเดเระ', icon: Eye }, { name: 'ฉลาด', icon: Bot }, { name: 'ขี้อาย', icon: User }, { name: 'จริงจัง', icon: FileText }, { name: 'ร่าเริง', icon: Smile }, { name: 'ซุ่มซ่าม', icon: Rabbit }, { name: 'แฟนออกสาว', icon: Users }, { name: 'หมาโกลเด้น', icon: Dog }, { name: 'แมวดำ', icon: Dog }, { name: 'อีนิกม่า', icon: CircleHelp }, { name: 'อัลฟ่า', icon: Crown }, { name: 'เบต้า', icon: Shield }, { name: 'โอเมก้า', icon: Omega }, { name: 'เนิร์ด', icon: Glasses }, { name: 'หมาเด็ก', icon: Dog }, { name: 'หมาแก่', icon: Dog }, { name: 'ซามอยด์', icon: Dog }, { name: 'เจ้าเล่ห์', icon: Eye }],
+  'ประเภท/องค์ประกอบเรื่อง': [{ name: 'ไทยโบราณ', icon: ScrollText }, { name: 'ผจญภัย', icon: Footprints }, { name: 'แฟนตาซี', icon: WandSparkles }, { name: 'แอคชัน', icon: Swords }, { name: 'ชีวิตประจำวัน', icon: Handshake }, { name: 'ยุคกลาง', icon: Swords }, { name: 'ข้ามมิติ', icon: Globe }, { name: 'เกิดใหม่', icon: ArrowUp }, { name: 'ไซไฟ', icon: Bot }, { name: 'หลังวันสิ้นโลก', icon: Skull }, { name: 'จีนย้อนยุค', icon: ScrollText }],
+  'เพศและความสัมพันธ์': [{ name: 'แฟน', icon: HeartCrack }, { name: 'แต่งงาน', icon: HandHeart }, { name: 'ยาโอย', icon: HandHeart }, { name: 'ยูริ', icon: BookHeart }, { name: 'ชายหญิง', icon: MessageCircleHeart }, { name: 'ชาย', icon: User }, { name: 'หญิง', icon: User }, { name: 'ไบเซ็กชวล', icon: HandHeart }, { name: 'ฟูตะ', icon: Users }, { name: 'เฟมบอย', icon: HeartCrack }, { name: 'แฟนเก่า', icon: HeartCrack }, { name: 'คนที่ชอบ', icon: MessageCircleHeart }, { name: 'เคะ', icon: ArrowDown }, { name: 'เมะ', icon: ArrowUp }],
+  'ความสัมพันธ์': [{ name: 'เพื่อน', icon: Users }, { name: 'เพื่อนร่วมห้อง', icon: House }, { name: 'เพื่อนสนิท', icon: Users }, { name: 'น้องสาว', icon: Users }, { name: 'พี่ชาย', icon: Users }, { name: 'แม่', icon: Users }, { name: 'พ่อ', icon: Users }, { name: 'ลูกสาว', icon: Users }, { name: 'ลูกชาย', icon: Users }],
+  'ช่วงอายุ': [{ name: 'วัยรุ่น', icon: PersonStanding }, { name: 'ผู้ใหญ่', icon: GraduationCap }],
+  'สิ่งมีชีวิตเหนือธรรมชาติ': [{ name: 'ปีศาจ', icon: Flame }, { name: 'เทวดา', icon: Bird }, { name: 'วิญญาณ', icon: Ghost }, { name: 'ซาตาน', icon: Zap }, { name: 'แม่มด', icon: WandSparkles }, { name: 'พ่อมด', icon: User }, { name: 'เอลฟ์', icon: Sparkles }, { name: 'แวมไพร์', icon: Zap }, { name: 'มนุษย์หมาป่า', icon: Dog }, { name: 'ซอมบี้', icon: Skull }, { name: 'เอเลี่ยน', icon: Globe }, { name: 'ยมทูต', icon: Skull }, { name: 'กลายพันธุ์', icon: Zap }, { name: 'มนุษย์สัตว์', icon: Dog }, { name: 'เงือก', icon: Cherry }, { name: 'โทรล', icon: Mountain }, { name: 'ยักษ์', icon: Mountain }, { name: 'ก็อบลิน', icon: Bug }],
+  'อื่นๆ': [{ name: 'อื่นๆ', icon: Ellipsis }]
 };
 
 
@@ -126,11 +127,13 @@ export default function CreateCharacterPage() {
       const currentValues = form.getValues();
       const input: GenerateCharacterDetailsInput = {
         prompt: `
+        สร้างตัวละครที่มีข้อมูลต่อไปนี้:
         ชื่อตัวละคร: ${currentValues.name || 'สุ่ม'}
         คำโปรย: ${currentValues.tagline || 'สุ่ม'}
         ลักษณะนิสัย: ${currentValues.description || 'สุ่ม'}
         คำทักทาย: ${currentValues.greeting || 'สุ่ม'}
         แท็ก: ${selectedTags.join(', ')}
+        กรุณาสร้างข้อมูลทั้งหมดเป็นภาษาไทย
       `};
       const result = await generateCharacterDetails(input);
       form.setValue('name', result.name);
@@ -219,15 +222,16 @@ export default function CreateCharacterPage() {
   };
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const newCharacter = {
+    addCharacter({
         name: values.name,
-        description: values.tagline,
-        personality: values.description,
-        background: values.history || '',
+        tagline: values.tagline,
+        description: values.description,
         greeting: values.greeting,
-        avatarUrl: values.avatarUrl || `https://picsum.photos/400/400?random=${Date.now()}`
-    }
-    addCharacter(newCharacter);
+        history: values.history || '',
+        visibility: values.visibility,
+        tags: values.tags,
+        avatarUrl: values.avatarUrl || `https://picsum.photos/seed/${encodeURIComponent(values.name)}/400/400`,
+    });
     
     toast({
       title: 'สร้างตัวละครสำเร็จ!',
@@ -388,7 +392,7 @@ export default function CreateCharacterPage() {
                                      {Object.entries(tagsConfig).map(([group, tags]) => (
                                       <CommandGroup key={group} heading={group}>
                                         {tags.map((tag, index) => {
-                                          const TagIcon = typeof tag === 'object' ? tag.icon : null;
+                                          const TagIcon = typeof tag === 'object' && tag.icon ? tag.icon : null;
                                           const tagName = typeof tag === 'object' ? tag.name : tag;
                                           return (
                                             <CommandItem

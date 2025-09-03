@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -15,7 +16,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CharacterCard } from '@/components/characters/character-card';
-import { getCharacters } from '@/lib/characters';
+import { getCharacters, Character } from '@/lib/characters';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,9 +30,18 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import React from 'react';
 
 export default function HomePage() {
-  const characters = getCharacters();
+  const [characters, setCharacters] = React.useState<Character[]>([]);
+  
+  React.useEffect(() => {
+    const fetchCharacters = async () => {
+      const chars = await getCharacters();
+      setCharacters(chars);
+    };
+    fetchCharacters();
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-muted/40">
@@ -63,9 +73,11 @@ export default function HomePage() {
             <Home />
             ไปหน้าหลัก
           </Button>
-          <Button variant="secondary" className="w-full justify-start gap-2">
-            <PlusCircle />
-            สร้างตัวละคร
+          <Button variant="secondary" className="w-full justify-start gap-2" asChild>
+            <Link href="/character/create">
+                <PlusCircle />
+                สร้างตัวละคร
+            </Link>
           </Button>
           <Button variant="ghost" className="w-full justify-start gap-2">
             <MessageSquare />

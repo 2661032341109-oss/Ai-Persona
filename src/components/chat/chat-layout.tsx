@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
@@ -24,7 +25,7 @@ export function ChatLayout({ character, children }: ChatLayoutProps) {
         </Button>
           <AspectRatio ratio={1/1} className="rounded-lg overflow-hidden mb-4">
             <Image
-                src={character.avatarUrl}
+                src={character.avatarUrl || `https://picsum.photos/seed/${encodeURIComponent(character.name)}/400/400`}
                 alt={`รูปประจำตัวของ ${character.name}`}
                 fill
                 className="object-cover"
@@ -32,18 +33,20 @@ export function ChatLayout({ character, children }: ChatLayoutProps) {
             />
           </AspectRatio>
           <h2 className="text-2xl font-bold font-headline">{character.name}</h2>
-          <p className="text-sm text-muted-foreground mt-1">{character.description}</p>
+          <p className="text-sm text-muted-foreground mt-1">{character.tagline}</p>
         </div>
         <Separator />
         <div className="flex-1 overflow-y-auto p-6 text-sm space-y-4">
           <div>
             <h3 className="font-semibold text-foreground/80 mb-2">บุคลิกภาพ</h3>
-            <p className="text-muted-foreground">{character.personality}</p>
+            <p className="text-muted-foreground">{character.description}</p>
           </div>
-          <div>
-            <h3 className="font-semibold text-foreground/80 mb-2">พื้นหลัง</h3>
-            <p className="text-muted-foreground whitespace-pre-wrap">{character.background}</p>
-          </div>
+          {character.history && (
+            <div>
+              <h3 className="font-semibold text-foreground/80 mb-2">ประวัติ</h3>
+              <p className="text-muted-foreground whitespace-pre-wrap">{character.history}</p>
+            </div>
+          )}
         </div>
       </aside>
       <div className="flex-1 flex flex-col bg-muted/20">

@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Character } from '@/lib/characters';
@@ -20,12 +21,12 @@ export function CharacterCard({ character }: CharacterCardProps) {
       <Card className="h-full overflow-hidden transition-all duration-300 ease-in-out group-hover:shadow-lg group-hover:-translate-y-1 group-hover:shadow-primary/20">
         <CardHeader>
           <CardTitle className="font-headline tracking-tight">{character.name}</CardTitle>
-          <CardDescription className="line-clamp-2">{character.description}</CardDescription>
+          <CardDescription className="line-clamp-2">{character.tagline}</CardDescription>
         </CardHeader>
         <CardContent>
           <AspectRatio ratio={1 / 1} className="bg-muted rounded-md overflow-hidden">
             <Image
-              src={character.avatarUrl}
+              src={character.avatarUrl || `https://picsum.photos/seed/${encodeURIComponent(character.name)}/400/400`}
               alt={`รูปประจำตัวของ ${character.name}`}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"

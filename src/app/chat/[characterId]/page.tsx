@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
@@ -31,20 +32,23 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (characterId) {
-      const char = getCharacterById(characterId);
-      if (char) {
-        setCharacter(char);
-        setMessages([
-          {
-            id: 'greeting',
-            author: 'ai',
-            text: char.greeting,
-          },
-        ]);
-      } else {
-        router.push('/'); // ไม่พบตัวละคร
+      const fetchCharacter = async () => {
+        const char = await getCharacterById(characterId);
+        if (char) {
+          setCharacter(char);
+          setMessages([
+            {
+              id: 'greeting',
+              author: 'ai',
+              text: char.greeting,
+            },
+          ]);
+        } else {
+          router.push('/'); // ไม่พบตัวละคร
+        }
+        setIsCharacterLoading(false);
       }
-      setIsCharacterLoading(false);
+      fetchCharacter();
     }
   }, [characterId, router]);
 
