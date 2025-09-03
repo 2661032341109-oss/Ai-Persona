@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { addCharacter } from '@/lib/characters';
-import { ArrowLeft, Bot, ImageIcon, Loader2, Sparkles, Wand2, X, PlusCircle, Trash2, UploadCloud, Flag, Shield, Eye, Tv, BookText, Gamepad2, Columns3, Rabbit, Smile, Mic, Star, Dumbbell, Handshake, Speech, History, SquarePlay, TvMinimal, Sticker, Globe, PocketKnife, CodeXml, Wrench, Stethoscope, School, Palette, ChefHat, Plane, Camera, Music2, Swords, BookHeart, Users, Crown, Skull, GraduationCap, ArrowUp, ArrowDown, HeartCrack, MessageCircleHeart, Footprints, WandSparkles, House, User, Cherry, Grape, Rocket } from 'lucide-react';
+import { ArrowLeft, Bot, ImageIcon, Loader2, Sparkles, Wand2, X, PlusCircle, Trash2, UploadCloud, Flag, Shield, Eye, Tv, BookText, Gamepad2, Columns3, Rabbit, Smile, Mic, Star, Dumbbell, Handshake, Speech, History, SquarePlay, TvMinimal, Sticker, Globe, PocketKnife, CodeXml, Wrench, Stethoscope, School, Palette, ChefHat, Plane, Camera, Music2, Swords, BookHeart, Users, Crown, Skull, GraduationCap, ArrowUp, ArrowDown, HeartCrack, MessageCircleHeart, Footprints, WandSparkles, House, User, Cherry, Grape, Rocket, Clapperboard } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
