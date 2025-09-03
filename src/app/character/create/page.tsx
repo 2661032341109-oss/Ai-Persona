@@ -43,6 +43,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from '@/components/ui/command';
 
 import { cn } from '@/lib/utils';
@@ -212,55 +213,55 @@ export default function CreateCharacterPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-5xl px-4 py-8">
+    <div className="container mx-auto max-w-5xl px-4 py-8 bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 font-sans">
       <div className="flex justify-between items-center mb-6">
         <Button variant="ghost" size="sm" asChild>
             <Link href="/">
-                <ArrowLeft />
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 กลับหน้าหลัก
             </Link>
         </Button>
-        <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-center my-8 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500">
+        <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-center my-8 bg-clip-text text-transparent bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500">
             สร้างตัวละคร
         </h1>
         <div className="flex gap-2">
-            <Button variant="outline">บันทึกแบบร่าง</Button>
-            <Button variant="secondary">ประวัติแบบร่าง</Button>
+            <Button variant="outline" className="border-purple-200 text-purple-600 hover:bg-purple-100">บันทึกแบบร่าง</Button>
+            <Button variant="secondary" className="bg-purple-100 text-purple-700 hover:bg-purple-200">ประวัติแบบร่าง</Button>
         </div>
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1 space-y-8">
-              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white/80 backdrop-blur-sm border-purple-200/50 rounded-2xl">
                   <CardHeader>
-                      <CardTitle>รูปโปรไฟล์</CardTitle>
+                      <CardTitle className="text-purple-800">รูปโปรไฟล์</CardTitle>
                       <CardDescription>
-                          <Link href="#" className="text-primary underline text-sm">ข้อกำหนดการสร้าง</Link>
+                          <Link href="#" className="text-purple-600 hover:text-purple-800 underline text-sm">ข้อกำหนดการสร้าง</Link>
                       </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                      <div className="aspect-square w-full rounded-lg bg-muted flex items-center justify-center overflow-hidden border-2 border-dashed border-primary/20">
+                      <div className="aspect-square w-full rounded-2xl bg-purple-50/50 flex items-center justify-center overflow-hidden border-2 border-dashed border-purple-200">
                         {isGeneratingImage ? (
-                          <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                            <Loader2 className="w-10 h-10 animate-spin text-primary"/>
+                          <div className="flex flex-col items-center gap-2 text-purple-600">
+                            <Loader2 className="w-10 h-10 animate-spin text-purple-500"/>
                             <p>กำลังสร้างรูปภาพ...</p>
                           </div>
                         ) : avatarPreview ? (
                            <Image src={avatarPreview} alt="Generated Avatar" width={400} height={400} className="object-cover w-full h-full" />
                         ) : (
-                           <div className="text-center text-muted-foreground p-4 flex flex-col items-center justify-center">
-                            <ImageIcon className="w-16 h-16 mx-auto mb-4 text-primary/30" />
+                           <div className="text-center text-purple-400 p-4 flex flex-col items-center justify-center">
+                            <ImageIcon className="w-16 h-16 mx-auto mb-4 text-purple-200" />
                             <p className="text-sm">รูปภาพจะแสดงที่นี่</p>
                           </div>
                         )}
                       </div>
-                      <Button type="button" onClick={handleGenerateCharacter} disabled={isGeneratingCharacter || isGeneratingImage} className="w-full bg-gradient-to-r from-blue-500 to-teal-400 text-white font-bold shadow-md hover:scale-105 transition-transform">
-                        {isGeneratingCharacter ? <Loader2 className="animate-spin" /> : <Wand2 />}
+                      <Button type="button" onClick={handleGenerateCharacter} disabled={isGeneratingCharacter || isGeneratingImage} className="w-full bg-gradient-to-r from-blue-500 to-teal-400 text-white font-bold shadow-md hover:scale-105 transition-transform rounded-xl py-3">
+                        {isGeneratingCharacter ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
                         <span>AI ช่วยสร้างข้อมูล (ฟรี)</span>
                       </Button>
-                      <Button type="button" onClick={handleGenerateImage} disabled={isGeneratingCharacter || isGeneratingImage} className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold shadow-md hover:scale-105 transition-transform">
-                        {isGeneratingImage ? <Loader2 className="animate-spin" /> : <Sparkles />}
+                      <Button type="button" onClick={handleGenerateImage} disabled={isGeneratingCharacter || isGeneratingImage} className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold shadow-md hover:scale-105 transition-transform rounded-xl py-3">
+                        {isGeneratingImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                         <span>AI สร้างรูปภาพ (ฟรี)</span>
                       </Button>
                   </CardContent>
@@ -268,9 +269,9 @@ export default function CreateCharacterPage() {
             </div>
 
             <div className="lg:col-span-2 space-y-8">
-              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white/80 backdrop-blur-sm border-purple-200/50 rounded-2xl">
                   <CardHeader>
-                      <CardTitle>ข้อมูลพื้นฐาน</CardTitle>
+                      <CardTitle className="text-purple-800">ข้อมูลพื้นฐาน</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
                       <FormField
@@ -280,9 +281,9 @@ export default function CreateCharacterPage() {
                           <FormItem>
                               <FormLabel>ชื่อตัวละคร *</FormLabel>
                               <FormControl>
-                              <Input placeholder="e.g. อัลเบิร์ต ไอน์สไตน์" {...field} maxLength={40} className="focus:ring-primary focus:border-primary transition-all duration-300"/>
+                              <Input placeholder="e.g. อัลเบิร์ต ไอน์สไตน์" {...field} maxLength={40} className="focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 rounded-lg border-purple-200/80"/>
                               </FormControl>
-                              <FormDescription className='flex justify-end'>{field.value.length}/40</FormDescription>
+                              <FormDescription className='flex justify-end text-xs text-muted-foreground pr-2'>{field.value.length}/40</FormDescription>
                               <FormMessage />
                           </FormItem>
                           )}
@@ -295,9 +296,9 @@ export default function CreateCharacterPage() {
                           <FormItem>
                               <FormLabel>คำโปรย * (สำหรับแสดงผลบนหน้าตัวละคร เป็นข้อมูลให้ AI)</FormLabel>
                               <FormControl>
-                              <Textarea placeholder="e.g. อัจฉริยะผู้ปฏิวัติวงการฟิสิกส์" {...field} maxLength={100} className="focus:ring-primary focus:border-primary transition-all duration-300"/>
+                              <Textarea placeholder="e.g. อัจฉริยะผู้ปฏิวัติวงการฟิสิกส์" {...field} maxLength={100} className="focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 rounded-lg border-purple-200/80"/>
                               </FormControl>
-                              <FormDescription className='flex justify-end'>{field.value.length}/100</FormDescription>
+                              <FormDescription className='flex justify-end text-xs text-muted-foreground pr-2'>{field.value.length}/100</FormDescription>
                               <FormMessage />
                           </FormItem>
                           )}
@@ -312,12 +313,13 @@ export default function CreateCharacterPage() {
                             <Popover>
                               <PopoverTrigger asChild>
                                 <FormControl>
-                                  <Button variant="outline" className="w-full justify-start font-normal h-auto flex-wrap hover:border-primary transition-colors">
+                                  <Button variant="outline" className="w-full justify-start font-normal h-auto flex-wrap hover:border-purple-300 transition-colors rounded-lg border-purple-200/80 min-h-[40px]">
                                     {selectedTags.length > 0 ? (
                                       selectedTags.map(tag => (
-                                        <Badge key={tag} variant="secondary" className="m-1 text-sm bg-primary/10 text-primary border-primary/20">
+                                        <Badge key={tag} variant="secondary" className="m-1 text-sm bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200">
                                           {tag}
-                                          <button
+                                          <span
+                                            role="button"
                                             className="ml-2 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
                                             onClick={(e) => {
                                               e.preventDefault();
@@ -326,18 +328,18 @@ export default function CreateCharacterPage() {
                                             }}
                                           >
                                             <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                                          </button>
+                                          </span>
                                         </Badge>
                                       ))
                                     ) : (
-                                      <span>เลือกแท็ก</span>
+                                      <span className="text-muted-foreground">เลือกแท็ก</span>
                                     )}
                                   </Button>
                                 </FormControl>
                               </PopoverTrigger>
-                              <PopoverContent className="w-[350px] p-0">
+                              <PopoverContent className="w-[400px] p-0 rounded-xl shadow-2xl border-purple-200">
                                 <Command>
-                                  <CommandInput placeholder="ค้นหาแท็ก..."/>
+                                  <CommandInput placeholder="ค้นหาแท็ก..." className="focus:ring-purple-500" />
                                   <CommandList>
                                     <CommandEmpty>ไม่พบแท็ก</CommandEmpty>
                                      {Object.entries(tagsConfig).map(([group, tags]) => (
@@ -355,6 +357,7 @@ export default function CreateCharacterPage() {
                                                   setSelectedTags(prev => [...prev, tagName]);
                                                 }
                                               }}
+                                              className="cursor-pointer hover:bg-purple-50 aria-selected:bg-purple-100 aria-selected:text-purple-900"
                                             >
                                               <div
                                                 className={cn(
@@ -391,9 +394,9 @@ export default function CreateCharacterPage() {
                           <FormItem>
                               <FormLabel>คำอธิบาย * (ไม่แสดงผลบนหน้าตัวละคร เป็นข้อมูลให้ AI)</FormLabel>
                               <FormControl>
-                              <Textarea placeholder="e.g. ฉันเป็นนักฟิสิกส์ มีบุคลิกใจดี ชอบอธิบายแนวคิดซับซ้อนให้เข้าใจง่าย ฉันมีความสนใจในวิทยาศาสตร์ จักรวาล และดนตรีคลาสสิก" {...field} rows={6} maxLength={4096} className="focus:ring-primary focus:border-primary transition-all duration-300"/>
+                              <Textarea placeholder="e.g. ฉันเป็นนักฟิสิกส์ มีบุคลิกใจดี ชอบอธิบายแนวคิดซับซ้อนให้เข้าใจง่าย ฉันมีความสนใจในวิทยาศาสตร์ จักรวาล และดนตรีคลาสสิก" {...field} rows={6} maxLength={4096} className="focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 rounded-lg border-purple-200/80"/>
                               </FormControl>
-                              <FormDescription className='flex justify-end'>{field.value.length}/4096</FormDescription>
+                              <FormDescription className='flex justify-end text-xs text-muted-foreground pr-2'>{field.value.length}/4096</FormDescription>
                               <FormMessage />
                           </FormItem>
                           )}
@@ -406,9 +409,9 @@ export default function CreateCharacterPage() {
                           <FormItem>
                               <FormLabel>คำทักทาย *</FormLabel>
                               <FormControl>
-                              <Textarea placeholder="e.g. สวัสดี ฉันคืออัลเบิร์ต ถามฉันเกี่ยวกับผลงานทางวิทยาศาสตร์ของฉันได้เลย" {...field} rows={4} maxLength={2048} className="focus:ring-primary focus:border-primary transition-all duration-300"/>
+                              <Textarea placeholder="e.g. สวัสดี ฉันคืออัลเบิร์ต ถามฉันเกี่ยวกับผลงานทางวิทยาศาสตร์ของฉันได้เลย" {...field} rows={4} maxLength={2048} className="focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 rounded-lg border-purple-200/80"/>
                               </FormControl>
-                              <FormDescription className='flex justify-end'>{field.value.length}/2048</FormDescription>
+                              <FormDescription className='flex justify-end text-xs text-muted-foreground pr-2'>{field.value.length}/2048</FormDescription>
                               <FormMessage />
                           </FormItem>
                           )}
@@ -421,9 +424,9 @@ export default function CreateCharacterPage() {
                           <FormItem>
                               <FormLabel>ประวัติตัวละคร (สำหรับผู้ใช้ดูเท่านั้น ไม่ใช้เป็นข้อมูลให้ AI) (ไม่บังคับ)</FormLabel>
                               <FormControl>
-                              <Textarea placeholder="e.g. อัลเบิร์ตเกิดในเยอรมนีเมื่อปี 1879 ได้รับรางวัลโนเบลจากการค้นพบปรากฏการณ์โฟโตอิเล็กทริก" {...field} rows={6} maxLength={4096} className="focus:ring-primary focus:border-primary transition-all duration-300"/>
+                              <Textarea placeholder="e.g. อัลเบิร์ตเกิดในเยอรมนีเมื่อปี 1879 ได้รับรางวัลโนเบลจากการค้นพบปรากฏการณ์โฟโตอิเล็กทริก" {...field} rows={6} maxLength={4096} className="focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 rounded-lg border-purple-200/80"/>
                               </FormControl>
-                              <FormDescription className='flex justify-end'>{field.value?.length || 0}/4096</FormDescription>
+                              <FormDescription className='flex justify-end text-xs text-muted-foreground pr-2'>{field.value?.length || 0}/4096</FormDescription>
                               <FormMessage />
                           </FormItem>
                           )}
@@ -431,9 +434,9 @@ export default function CreateCharacterPage() {
                   </CardContent>
               </Card>
 
-              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white/80 backdrop-blur-sm border-purple-200/50 rounded-2xl">
                   <CardHeader>
-                      <CardTitle>การมองเห็น *</CardTitle>
+                      <CardTitle className="text-purple-800">การมองเห็น *</CardTitle>
                   </CardHeader>
                   <CardContent>
                       <FormField
@@ -474,13 +477,13 @@ export default function CreateCharacterPage() {
             </div>
           </div>
            
-            <div className="flex justify-end">
-                <Button type="submit" size="lg" className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-bold shadow-lg hover:scale-105 transition-transform">
-                  <Rocket className="mr-2"/>
+            <div className="flex justify-center mt-8">
+                <Button type="submit" size="lg" className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-bold shadow-lg hover:scale-110 transition-transform rounded-full px-12 py-6 text-lg">
+                  <Rocket className="mr-2 h-5 w-5"/>
                   สร้างตัวละคร
                 </Button>
             </div>
-             <p className="text-xs text-muted-foreground text-center">
+             <p className="text-xs text-muted-foreground text-center mt-4">
                 โปรดตรวจสอบให้แน่ใจว่าตัวละครเป็นไปตาม <Link href="#" className="underline hover:text-primary">ข้อกำหนดและเงื่อนไข</Link>
             </p>
         </form>
@@ -488,3 +491,5 @@ export default function CreateCharacterPage() {
     </div>
   );
 }
+
+    
