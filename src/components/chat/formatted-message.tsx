@@ -25,10 +25,10 @@ const parseFormattedText = (text: string): React.ReactNode => {
       );
     }
     // Normal part (Narration/Action)
-    return <span key={index}>{part}</span>;
+    return <span key={index} className="text-slate-600 dark:text-slate-400">{part}</span>;
   });
 
-  return <p className="whitespace-pre-wrap leading-relaxed text-slate-600 dark:text-slate-400">{content}</p>;
+  return <p className="whitespace-pre-wrap leading-relaxed">{content}</p>;
 };
 
 

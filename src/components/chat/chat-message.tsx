@@ -32,10 +32,10 @@ export function ChatMessage({ message, character }: ChatMessageProps) {
       )}
       <div
         className={cn(
-          'max-w-xl rounded-2xl px-5 py-3 text-base shadow-lg transition-all',
+          'max-w-xl rounded-2xl px-5 py-3 text-base shadow-md transition-all',
           isUser
-            ? 'bg-gradient-to-br from-blue-500 to-cyan-400 text-white rounded-br-none'
-            : 'bg-white text-slate-800 rounded-bl-none'
+            ? 'bg-primary text-primary-foreground rounded-br-none'
+            : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-none'
         )}
       >
         {isUser ? (
