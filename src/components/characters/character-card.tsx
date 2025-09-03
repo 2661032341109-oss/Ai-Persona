@@ -76,9 +76,11 @@ export function CharacterCard({ character, onCharacterDeleted }: CharacterCardPr
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                            <Edit className="mr-2 h-4 w-4" />
-                            แก้ไข
+                        <DropdownMenuItem asChild>
+                           <Link href={`/character/edit/${character.id}`}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                แก้ไข
+                            </Link>
                         </DropdownMenuItem>
                         <AlertDialogTrigger asChild>
                             <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive">
