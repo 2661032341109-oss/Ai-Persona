@@ -13,6 +13,7 @@ import { generateChatResponse } from '@/ai/flows/generate-chat-response';
 import { useToast } from '@/hooks/use-toast';
 import { getConversation, saveConversation } from '@/lib/conversations';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { Loader2 } from 'lucide-react';
 
 
 export type Message = {
@@ -55,19 +56,30 @@ export default function ChatPage() {
     if (characterId) {
       const fetchCharacter = async () => {
         setIsCharacterLoading(true);
-        const char = await getCharacterById(characterId);
-        if (char) {
-          setCharacter(char);
-          await fetchChatHistory(char);
-        } else {
-          router.push('/');
-          toast({
-            variant: 'destructive',
-            title: 'ไม่พบตัวละคร',
-            description: 'ไม่พบตัวละครที่คุณต้องการแชทด้วย',
-          });
+        try {
+            const char = await getCharacterById(characterId);
+            if (char) {
+              setCharacter(char);
+              await fetchChatHistory(char);
+            } else {
+              toast({
+                variant: 'destructive',
+                title: 'ไม่พบตัวละคร',
+                description: 'ไม่พบตัวละครที่คุณต้องการแชทด้วย',
+              });
+              router.push('/');
+            }
+        } catch (error) {
+            console.error("Failed to fetch character:", error);
+            toast({
+                variant: 'destructive',
+                title: 'เกิดข้อผิดพลาด',
+                description: 'ไม่สามารถโหลดข้อมูลตัวละครได้',
+            });
+            router.push('/');
+        } finally {
+            setIsCharacterLoading(false);
         }
-        setIsCharacterLoading(false);
       }
       fetchCharacter();
     }
@@ -99,7 +111,7 @@ export default function ChatPage() {
       const result = await generateChatResponse({
         characterName: character.name,
         characterDescription: character.description,
-        conversationHistory: newMessages.slice(-10).map(msg => ({ author: msg.author, text: msg.text })), // Send last 10 messages for context
+        conversationHistory: newMessages.slice(-20).map(msg => ({ author: msg.author, text: msg.text })), // Send last 20 messages for context
       });
 
       if (result.response) {
@@ -133,7 +145,7 @@ export default function ChatPage() {
       return (
         <div className="flex h-screen w-full items-center justify-center bg-background">
             <div className="flex flex-col items-center gap-4 text-center">
-                <TypingIndicator character={{ name: 'กำลังโหลด', avatarUrl: ''}} />
+                <Loader2 className="h-12 w-12 animate-spin text-primary"/>
                 <h2 className="text-xl font-semibold">กำลังโหลดตัวละคร...</h2>
                 <p className="text-muted-foreground">กรุณารอสักครู่</p>
             </div>
@@ -144,7 +156,7 @@ export default function ChatPage() {
   return (
     <SidebarProvider>
     <ChatLayout character={character}>
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50 dark:from-slate-900 dark:via-purple-950 dark:to-slate-950">
         {messages.map((msg) => (
           <ChatMessage key={msg.id} message={msg} character={character} />
         ))}

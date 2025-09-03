@@ -4,6 +4,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { getConversation, deleteConversation } from './conversations';
+import { revalidatePath } from 'next/cache';
 
 export type Character = {
   id: string;
@@ -40,17 +41,21 @@ const charactersFilePath = path.join(process.cwd(), 'src', 'lib', 'characters.js
 
 async function readCharactersFromFile(): Promise<Character[]> {
   try {
+    // Check if the file exists. If not, return an empty array and don't create the file yet.
     await fs.access(charactersFilePath);
     const jsonData = await fs.readFile(charactersFilePath, 'utf-8');
-    if (!jsonData) {
-      // If the file is empty, return an empty array
-      await writeCharactersToFile([]); // Ensure the file is a valid empty JSON array
+    // If the file is empty or just whitespace, return an empty array.
+    if (!jsonData.trim()) {
       return [];
     }
     return JSON.parse(jsonData);
-  } catch (error) {
-    // If the file doesn't exist, create it with an empty array
-    await writeCharactersToFile([]);
+  } catch (error: any) {
+    // If the error is that the file doesn't exist, it's a valid state.
+    if (error.code === 'ENOENT') {
+      return [];
+    }
+    // For other errors, log them as they might be actual issues.
+    console.error('Error reading characters file:', error);
     return [];
   }
 }
@@ -58,6 +63,10 @@ async function readCharactersFromFile(): Promise<Character[]> {
 async function writeCharactersToFile(characters: Character[]) {
   try {
     await fs.writeFile(charactersFilePath, JSON.stringify(characters, null, 2), 'utf-8');
+    revalidatePath('/'); // Revalidate the home page to show new/updated characters
+    revalidatePath('/character/edit/[characterId]');
+    revalidatePath('/chat/[characterId]');
+
   } catch (error) {
     console.error('Error writing characters file:', error);
   }
@@ -117,7 +126,7 @@ export async function getCharactersWithLastMessage(): Promise<(Character & { las
     const charactersWithLastMessage = await Promise.all(
         characters.map(async (character) => {
             const conversation = await getConversation(character.id);
-            const lastMessage = conversation.length > 0 ? conversation[conversation.length - 1] : null;
+            const lastMessage = conversation.length > 1 ? conversation[conversation.length - 1] : null; // Get last real message, not greeting
             return {
                 ...character,
                 lastMessage: lastMessage?.text,
