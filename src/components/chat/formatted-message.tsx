@@ -11,14 +11,14 @@ interface FormattedMessageProps {
 const parseFormattedText = (text: string): React.ReactNode => {
   if (!text) return null;
 
+  // Split by the regex, keeping the delimiters. Filter out empty strings.
   const parts = text.split(/(\*.*?\*)/g).filter(Boolean);
 
   const content = parts.map((part, index) => {
     if (part.startsWith('*') && part.endsWith('*')) {
       // Italicized part (Dialogue/Inner Tone)
-      // Use a more distinct color for dialogue
       return (
-        <i key={index} className="text-slate-600 font-serif">
+        <i key={index} className="text-slate-600 dark:text-slate-300 font-serif not-italic">
           {part.slice(1, -1)}
         </i>
       );
@@ -32,8 +32,6 @@ const parseFormattedText = (text: string): React.ReactNode => {
 
 
 export function FormattedMessage({ text }: FormattedMessageProps) {
-  // Directly parse the text. No need for useEffect or loading states
-  // as this is a simple, synchronous operation.
   const formattedContent = parseFormattedText(text);
 
   return <>{formattedContent}</>;

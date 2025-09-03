@@ -5,6 +5,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 import {
   GenerateChatResponseInputSchema,
   GenerateChatResponseOutputSchema,
@@ -17,27 +18,19 @@ import type {
 export async function generateChatResponse(
   input: GenerateChatResponseInput
 ): Promise<GenerateChatResponseOutput> {
-  // Pre-format the conversation history into a single string.
   const historyText = input.conversationHistory
-    .map(msg => {
-      return msg.author === 'user'
-        ? `User: ${msg.text}`
-        : `${input.characterName}: ${msg.text}`;
-    })
+    .map(msg => `${msg.author === 'user' ? 'User' : input.characterName}: ${msg.text}`)
     .join('\n');
 
-  // Call the flow with the pre-formatted history.
   const { response } = await generateChatResponseFlow({
-    characterName: input.characterName,
-    characterDescription: input.characterDescription,
-    // Pass the formatted string instead of the array object.
+    ...input,
     conversationHistory: historyText,
   });
 
   return { response };
 }
 
-// Define a new schema for the simplified flow input.
+// Define a new schema for the simplified flow input, extending the original but overriding conversationHistory.
 const SimpleChatInputSchema = GenerateChatResponseInputSchema.extend({
   conversationHistory: z.string().describe("The pre-formatted history of the conversation as a single text block."),
 });
