@@ -11,7 +11,7 @@ const generateCharacterPrompt = ai.definePrompt({
   name: 'generateCharacterPrompt',
   input: { schema: GenerateCharacterDetailsInputSchema },
   output: { schema: GenerateCharacterDetailsOutputSchema },
-  prompt: `You are an expert character creator. Based on the following prompt, generate a detailed character. Fill in any missing details with creative and interesting information. Ensure all fields are populated.
+  prompt: `คุณคือผู้เชี่ยวชาญการสร้างตัวละคร สร้างตัวละครที่มีรายละเอียดตามพรอมต์ต่อไปนี้ โปรดสร้างเป็นภาษาไทยทั้งหมด กรอกข้อมูลที่ขาดหายไป ด้วยข้อมูลที่สร้างสรรค์และน่าสนใจ ตรวจสอบให้แน่ใจว่าได้กรอกข้อมูลในฟิลด์ทั้งหมดแล้ว
 
 Prompt: {{{prompt}}}
 `,
