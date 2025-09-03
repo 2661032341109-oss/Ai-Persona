@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -18,7 +19,7 @@ const parseFormattedText = (text: string): React.ReactNode => {
     if (part.startsWith('*') && part.endsWith('*')) {
       // Italicized part (Dialogue/Inner Tone)
       return (
-        <i key={index} className="text-slate-600 dark:text-slate-300 font-serif not-italic">
+        <i key={index} className="text-slate-800 dark:text-slate-200 font-serif not-italic">
           {part.slice(1, -1)}
         </i>
       );
@@ -27,7 +28,7 @@ const parseFormattedText = (text: string): React.ReactNode => {
     return <span key={index}>{part}</span>;
   });
 
-  return <p className="whitespace-pre-wrap leading-relaxed">{content}</p>;
+  return <p className="whitespace-pre-wrap leading-relaxed text-slate-600 dark:text-slate-400">{content}</p>;
 };
 
 
