@@ -1,3 +1,4 @@
+
 'use server';
 
 import { db } from '@/lib/firebase';
@@ -24,8 +25,7 @@ export type FirestoreMessage = Omit<ChatMessage, 'id'> & {
 // This function now specifically gets the last message for the preview on the main page.
 export async function getLastMessage(characterId: string): Promise<ChatMessage | null> {
   const messagesCollection = collection(db, 'characters', characterId, 'messages');
-  // We query for the last 2 messages because the very last one might be the user's, and we want the AI's response if possible.
-  // Or, if there's only a greeting, we show that.
+  // We query for the last 1 message to show on the card.
   const q = query(messagesCollection, orderBy('createdAt', 'desc'), limit(1));
   const querySnapshot = await getDocs(q);
   
@@ -109,11 +109,32 @@ export async function deleteConversation(characterId: string): Promise<void> {
     return; // Nothing to delete
   }
 
-  const batch = writeBatch(db);
-  querySnapshot.docs.forEach(doc => {
-    batch.delete(doc.ref);
+  // Firestore allows a maximum of 500 operations in a single batch.
+  const batches = [];
+  let currentBatch = writeBatch(db);
+  let operationCount = 0;
+
+  querySnapshot.docs.forEach((doc, index) => {
+    currentBatch.delete(doc.ref);
+    operationCount++;
+    // If the batch is full, push it to the array and start a new one.
+    if (operationCount === 500) {
+      batches.push(currentBatch);
+      currentBatch = writeBatch(db);
+      operationCount = 0;
+    }
   });
 
-  await batch.commit();
-  console.log(`Conversation for character ${characterId} has been deleted.`);
+  // Add the last batch if it has any operations.
+  if (operationCount > 0) {
+    batches.push(currentBatch);
+  }
+
+  // Commit all batches.
+  try {
+    await Promise.all(batches.map(batch => batch.commit()));
+    console.log(`Conversation for character ${characterId} has been deleted.`);
+  } catch(error) {
+    console.error("Error deleting conversation in batches:", error);
+  }
 }

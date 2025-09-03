@@ -18,8 +18,8 @@ export async function generateChatResponse(
   input: GenerateChatResponseInput
 ): Promise<GenerateChatResponseOutput> {
   // Directly call the flow with the original input schema.
-  const { response } = await generateChatResponseFlow(input);
-  return { response };
+  const  output  = await generateChatResponseFlow(input);
+  return output;
 }
 
 const prompt = ai.definePrompt({
@@ -51,13 +51,11 @@ Now, generate the response for {{{characterName}}}:
 const generateChatResponseFlow = ai.defineFlow(
   {
     name: 'generateChatResponseFlow',
-    // Use the original, correct input schema.
     inputSchema: GenerateChatResponseInputSchema,
     outputSchema: GenerateChatResponseOutputSchema,
   },
   async (input) => {
     const { output } = await prompt(input);
-    // The prompt now directly returns the desired output schema.
     if (!output) {
       throw new Error("AI failed to generate a response.");
     }

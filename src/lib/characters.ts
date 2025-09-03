@@ -1,3 +1,4 @@
+
 'use server';
 
 import { db } from '@/lib/firebase';
@@ -36,11 +37,13 @@ export type Character = {
 
 const charactersCollection = collection(db, 'characters');
 
-async function revalidateAllPaths() {
+function revalidatePaths(characterId?: string) {
     revalidatePath('/');
     revalidatePath('/character/create');
-    revalidatePath('/character/edit/[characterId]');
-    revalidatePath('/chat/[characterId]');
+    if (characterId) {
+        revalidatePath(`/character/edit/${characterId}`);
+        revalidatePath(`/chat/${characterId}`);
+    }
 }
 
 
@@ -73,9 +76,11 @@ export async function addCharacter(characterData: Omit<Character, 'id' | 'create
     likeCount: 0,
     chatCount: 0,
     messageCount: 0,
+    // ensure avatarUrl is not undefined
+    avatarUrl: characterData.avatarUrl || `https://picsum.photos/seed/${encodeURIComponent(characterData.name)}/400/400`,
   };
   const docRef = await addDoc(charactersCollection, newCharacterData);
-  await revalidateAllPaths();
+  revalidatePaths();
   return { id: docRef.id, ...newCharacterData };
 }
 
@@ -89,7 +94,7 @@ export async function updateCharacter(id:string, characterData: Partial<Omit<Cha
     }
     
     await updateDoc(characterDoc, characterData);
-    await revalidateAllPaths();
+    revalidatePaths(id);
 
     const updatedDocSnap = await getDoc(characterDoc);
     return { id: updatedDocSnap.id, ...updatedDocSnap.data() } as Character;
@@ -100,7 +105,7 @@ export async function deleteCharacter(id: string): Promise<void> {
     await deleteDoc(characterDoc);
     // Also delete associated conversation subcollection
     await deleteConversation(id); 
-    await revalidateAllPaths();
+    revalidatePaths(id);
     console.log(`Character ${id} and their conversation have been deleted.`);
 }
 

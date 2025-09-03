@@ -212,7 +212,7 @@ export default function EditCharacterPage() {
             history: values.history || '',
             visibility: values.visibility,
             tags: values.tags,
-            avatarUrl: values.avatarUrl || `https://picsum.photos/seed/${encodeURIComponent(values.name)}/400/400`,
+            avatarUrl: values.avatarUrl,
         });
         
         toast({
