@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { addCharacter } from '@/lib/characters';
-import { ArrowLeft, Bot, ImageIcon, Loader2, Sparkles, Wand2, X } from 'lucide-react';
+import { ArrowLeft, Bot, ImageIcon, Loader2, Sparkles, Wand2, X, PlusCircle, Trash2, UploadCloud, Flag, Shield, Eye, Tv, BookText, Gamepad2, Columns3, Rabbit, Smile, Mic, Star, Dumbbell, Handshake, Speech, History, SquarePlay, TvMinimal, Sticker, Globe, PocketKnife, CodeXml, Wrench, Stethoscope, School, Palette, ChefHat, Plane, Camera, Music2, Swords, BookHeart, Users, Crown, Skull, GraduationCap, ArrowUp, ArrowDown, HeartCrack, MessageCircleHeart, Footprints, WandSparkles, House, User, Cherry, Grape, Rocket } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -43,18 +43,35 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
 } from '@/components/ui/command';
+
 import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react';
 import React from 'react';
 import { generateCharacterDetails } from '@/ai/flows/generate-character-details';
 import { generateImage } from '@/ai/flows/generate-image';
+import type { GenerateCharacterDetailsInput, GenerateImageInput } from '@/ai/schemas';
 
 const tagsConfig = {
-  'ระดับเนื้อหา': ['ธงแดง', 'ธงเขียว', 'ธงเหลือง', 'ธงขาว', 'PG', 'NC'],
-  'ประเภทสื่อ': ['อนิเมะ', 'มังงะ', 'วิดีโอเกม', 'ภาพยนตร์', 'ซีรีส์', 'การ์ตูนตะวันตก', 'ตัวละครมีม', 'ออริจินอล'],
-  'บทบาท': ['นักแสดง', 'นักร้อง', 'ไอดอล', 'นักกีฬา', 'นักธุรกิจ', 'นักการเมือง', 'บุคคลสำคัญในประวัติศาสตร์', 'ยูทูบเบอร์', 'สตรีมเมอร์', 'วีทูบเบอร์', 'อินฟลูเอนเซอร์เสมือน', 'มาเฟีย', 'ระบบ', 'วิศวะ', 'พ่อหมอ', 'หมอ', 'ครู', 'ศิลปิน', 'เชฟ', 'นักบิน', 'ช่างภาพ', 'นักดนตรี', 'โปรแกรมเมอร์', 'บอดี้การ์ด', 'หุ่นยนต์', 'นักวิทยาศาสตร์', 'นักสืบ', 'ตำรวจ', 'อัศวิน', 'นักบวช', 'แม่ชี', 'พ่อบ้าน', 'เทพเจ้า', 'คนไข้', 'พยาบาล', 'นักบุญ', 'ตัวร้าย', 'ฮีโร่', 'ขุนนาง', 'นักศึกษา', 'จักพรรดื', 'พระมเหสี', 'พระสนม', 'รัชทายาท'],
+  'ระดับเนื้อหา': [
+    { name: 'ธงแดง', icon: Flag },
+    { name: 'ธงเขียว', icon: Flag },
+    { name: 'ธงเหลือง', icon: Flag },
+    { name: 'ธงขาว', icon: Flag },
+    { name: 'PG', icon: Shield },
+    { name: 'NC', icon: Eye },
+  ],
+  'ประเภทสื่อ': [
+    { name: 'อนิเมะ', icon: Tv },
+    { name: 'มังงะ', icon: BookText },
+    { name: 'วิดีโอเกม', icon: Gamepad2 },
+    { name: 'ภาพยนตร์', icon: Clapperboard },
+    { name: 'ซีรีส์', icon: Columns3 },
+    { name: 'การ์ตูนตะวันตก', icon: Rabbit },
+    { name: 'ตัวละครมีม', icon: Smile },
+    { name: 'ออริจินอล', icon: Bot },
+  ],
+   'บทบาท': ['นักแสดง', 'นักร้อง', 'ไอดอล', 'นักกีฬา', 'นักธุรกิจ', 'นักการเมือง', 'บุคคลสำคัญในประวัติศาสตร์', 'ยูทูบเบอร์', 'สตรีมเมอร์', 'วีทูบเบอร์', 'อินฟลูเอนเซอร์เสมือน', 'มาเฟีย', 'ระบบ', 'วิศวะ', 'พ่อหมอ', 'หมอ', 'ครู', 'ศิลปิน', 'เชฟ', 'นักบิน', 'ช่างภาพ', 'นักดนตรี', 'โปรแกรมเมอร์', 'บอดี้การ์ด', 'หุ่นยนต์', 'นักวิทยาศาสตร์', 'นักสืบ', 'ตำรวจ', 'อัศวิน', 'นักบวช', 'แม่ชี', 'พ่อบ้าน', 'เทพเจ้า', 'คนไข้', 'พยาบาล', 'นักบุญ', 'ตัวร้าย', 'ฮีโร่', 'ขุนนาง', 'นักศึกษา', 'จักพรรดื', 'พระมเหสี', 'พระสนม', 'รัชทายาท'],
   'บุคลิกและลักษณะนิสัย': ['โรแมนติก', 'อ่อนโยน', 'ตลก', 'สยองขวัญ', 'ระทึกขวัญ', 'ดราม่า', 'ลึกลับ', 'ซึนเดเระ', 'คุเดเระ', 'ฉลาด', 'ขี้อาย', 'จริงจัง', 'ร่าเริง', 'ซุ่มซ่าม', 'แฟนออกสาว', 'หมาโกลเด้น', 'แมวดำ', 'อีนิกม่า', 'อัลฟ่า', 'เบต้า', 'โอเมก้า', 'เนิร์ด', 'หมาเด็ก', 'หมาแก่', 'ซามอยด์', 'เจ้าเล่ห์'],
   'ประเภท/องค์ประกอบเรื่อง': ['ไทยโบราณ', 'ผจญภัย', 'แฟนตาซี', 'แอคชัน', 'ชีวิตประจำวัน', 'ยุคกลาง', 'ข้ามมิติ', 'เกิดใหม่', 'ไซไฟ', 'หลังวันสิ้นโลก', 'จีนย้อนยุค'],
   'เพศและความสัมพันธ์': ['แฟน', 'แต่งงาน', 'ยาโอย', 'ยูริ', 'ชายหญิง', 'ชาย', 'หญิง', 'ไบเซ็กชวล', 'ฟูตะ', 'เฟมบอย', 'แฟนเก่า', 'คนที่ชอบ', 'เคะ', 'เมะ'],
@@ -116,14 +133,15 @@ export default function CreateCharacterPage() {
     setIsGeneratingCharacter(true);
     try {
       const currentValues = form.getValues();
-      const input = `
+      const input: GenerateCharacterDetailsInput = {
+        prompt: `
         ชื่อตัวละคร: ${currentValues.name || 'สุ่ม'}
         คำโปรย: ${currentValues.tagline || 'สุ่ม'}
         ลักษณะนิสัย: ${currentValues.description || 'สุ่ม'}
         คำทักทาย: ${currentValues.greeting || 'สุ่ม'}
         แท็ก: ${selectedTags.join(', ')}
-      `;
-      const result = await generateCharacterDetails({ prompt: input });
+      `};
+      const result = await generateCharacterDetails(input);
       form.setValue('name', result.name);
       form.setValue('tagline', result.tagline);
       form.setValue('description', result.personality);
@@ -149,8 +167,10 @@ export default function CreateCharacterPage() {
     setAvatarPreview(null);
     try {
       const currentValues = form.getValues();
-      const prompt = `อนิเมะ, ${currentValues.name}, ${currentValues.tagline}, ${currentValues.description}, ${selectedTags.join(', ')}`;
-      const result = await generateImage({ prompt });
+      const input: GenerateImageInput = {
+        prompt: `อนิเมะ, ${currentValues.name}, ${currentValues.tagline}, ${currentValues.description}, ${selectedTags.join(', ')}`
+      };
+      const result = await generateImage(input);
       if (result.imageUrl) {
         setAvatarPreview(result.imageUrl);
         form.setValue('avatarUrl', result.imageUrl);
@@ -200,7 +220,9 @@ export default function CreateCharacterPage() {
                 กลับหน้าหลัก
             </Link>
         </Button>
-        <h1 className="text-3xl font-bold">สร้างตัวละคร</h1>
+        <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl text-center my-8 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500">
+            สร้างตัวละคร
+        </h1>
         <div className="flex gap-2">
             <Button variant="outline">บันทึกแบบร่าง</Button>
             <Button variant="secondary">ประวัติแบบร่าง</Button>
@@ -210,7 +232,7 @@ export default function CreateCharacterPage() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1 space-y-8">
-              <Card>
+              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <CardHeader>
                       <CardTitle>รูปโปรไฟล์</CardTitle>
                       <CardDescription>
@@ -218,7 +240,7 @@ export default function CreateCharacterPage() {
                       </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                      <div className="aspect-square w-full rounded-lg bg-muted flex items-center justify-center overflow-hidden border-2 border-dashed">
+                      <div className="aspect-square w-full rounded-lg bg-muted flex items-center justify-center overflow-hidden border-2 border-dashed border-primary/20">
                         {isGeneratingImage ? (
                           <div className="flex flex-col items-center gap-2 text-muted-foreground">
                             <Loader2 className="w-10 h-10 animate-spin text-primary"/>
@@ -227,17 +249,17 @@ export default function CreateCharacterPage() {
                         ) : avatarPreview ? (
                            <Image src={avatarPreview} alt="Generated Avatar" width={400} height={400} className="object-cover w-full h-full" />
                         ) : (
-                           <div className="text-center text-muted-foreground p-4">
-                            <ImageIcon className="w-12 h-12 mx-auto mb-2" />
+                           <div className="text-center text-muted-foreground p-4 flex flex-col items-center justify-center">
+                            <ImageIcon className="w-16 h-16 mx-auto mb-4 text-primary/30" />
                             <p className="text-sm">รูปภาพจะแสดงที่นี่</p>
                           </div>
                         )}
                       </div>
-                      <Button type="button" onClick={handleGenerateCharacter} disabled={isGeneratingCharacter || isGeneratingImage} className="w-full bg-gradient-to-r from-pink-500 to-yellow-500 text-white">
+                      <Button type="button" onClick={handleGenerateCharacter} disabled={isGeneratingCharacter || isGeneratingImage} className="w-full bg-gradient-to-r from-blue-500 to-teal-400 text-white font-bold shadow-md hover:scale-105 transition-transform">
                         {isGeneratingCharacter ? <Loader2 className="animate-spin" /> : <Wand2 />}
-                        <span>AI ช่วยสร้างข้อมูล</span>
+                        <span>AI ช่วยสร้างข้อมูล (ฟรี)</span>
                       </Button>
-                      <Button type="button" onClick={handleGenerateImage} disabled={isGeneratingCharacter || isGeneratingImage} className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white">
+                      <Button type="button" onClick={handleGenerateImage} disabled={isGeneratingCharacter || isGeneratingImage} className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold shadow-md hover:scale-105 transition-transform">
                         {isGeneratingImage ? <Loader2 className="animate-spin" /> : <Sparkles />}
                         <span>AI สร้างรูปภาพ (ฟรี)</span>
                       </Button>
@@ -246,7 +268,7 @@ export default function CreateCharacterPage() {
             </div>
 
             <div className="lg:col-span-2 space-y-8">
-              <Card>
+              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <CardHeader>
                       <CardTitle>ข้อมูลพื้นฐาน</CardTitle>
                   </CardHeader>
@@ -258,7 +280,7 @@ export default function CreateCharacterPage() {
                           <FormItem>
                               <FormLabel>ชื่อตัวละคร *</FormLabel>
                               <FormControl>
-                              <Input placeholder="e.g. อัลเบิร์ต ไอน์สไตน์" {...field} maxLength={40} />
+                              <Input placeholder="e.g. อัลเบิร์ต ไอน์สไตน์" {...field} maxLength={40} className="focus:ring-primary focus:border-primary transition-all duration-300"/>
                               </FormControl>
                               <FormDescription className='flex justify-end'>{field.value.length}/40</FormDescription>
                               <FormMessage />
@@ -273,7 +295,7 @@ export default function CreateCharacterPage() {
                           <FormItem>
                               <FormLabel>คำโปรย * (สำหรับแสดงผลบนหน้าตัวละคร เป็นข้อมูลให้ AI)</FormLabel>
                               <FormControl>
-                              <Textarea placeholder="e.g. อัจฉริยะผู้ปฏิวัติวงการฟิสิกส์" {...field} maxLength={100} />
+                              <Textarea placeholder="e.g. อัจฉริยะผู้ปฏิวัติวงการฟิสิกส์" {...field} maxLength={100} className="focus:ring-primary focus:border-primary transition-all duration-300"/>
                               </FormControl>
                               <FormDescription className='flex justify-end'>{field.value.length}/100</FormDescription>
                               <FormMessage />
@@ -290,13 +312,13 @@ export default function CreateCharacterPage() {
                             <Popover>
                               <PopoverTrigger asChild>
                                 <FormControl>
-                                  <Button variant="outline" className="w-full justify-start font-normal h-auto flex-wrap">
+                                  <Button variant="outline" className="w-full justify-start font-normal h-auto flex-wrap hover:border-primary transition-colors">
                                     {selectedTags.length > 0 ? (
                                       selectedTags.map(tag => (
-                                        <Badge key={tag} variant="secondary" className="m-1">
+                                        <Badge key={tag} variant="secondary" className="m-1 text-sm bg-primary/10 text-primary border-primary/20">
                                           {tag}
                                           <button
-                                            className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                            className="ml-2 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
                                             onClick={(e) => {
                                               e.preventDefault();
                                               e.stopPropagation();
@@ -313,37 +335,42 @@ export default function CreateCharacterPage() {
                                   </Button>
                                 </FormControl>
                               </PopoverTrigger>
-                              <PopoverContent className="w-[300px] p-0">
+                              <PopoverContent className="w-[350px] p-0">
                                 <Command>
                                   <CommandInput placeholder="ค้นหาแท็ก..."/>
                                   <CommandList>
                                     <CommandEmpty>ไม่พบแท็ก</CommandEmpty>
-                                    {Object.entries(tagsConfig).map(([group, tags]) => (
+                                     {Object.entries(tagsConfig).map(([group, tags]) => (
                                       <CommandGroup key={group} heading={group}>
-                                        {tags.map(tag => (
-                                          <CommandItem
-                                            key={tag}
-                                            onSelect={() => {
-                                              if (selectedTags.includes(tag)) {
-                                                setSelectedTags(prev => prev.filter(t => t !== tag));
-                                              } else if (selectedTags.length < 10) {
-                                                setSelectedTags(prev => [...prev, tag]);
-                                              }
-                                            }}
-                                          >
-                                            <div
-                                              className={cn(
-                                                "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                                                selectedTags.includes(tag)
-                                                  ? "bg-primary text-primary-foreground"
-                                                  : "opacity-50 [&_svg]:invisible"
-                                              )}
+                                        {tags.map((tag, index) => {
+                                          const TagIcon = typeof tag === 'object' ? tag.icon : null;
+                                          const tagName = typeof tag === 'object' ? tag.name : tag;
+                                          return (
+                                            <CommandItem
+                                              key={`${group}-${tagName}-${index}`}
+                                              onSelect={() => {
+                                                if (selectedTags.includes(tagName)) {
+                                                  setSelectedTags(prev => prev.filter(t => t !== tagName));
+                                                } else if (selectedTags.length < 10) {
+                                                  setSelectedTags(prev => [...prev, tagName]);
+                                                }
+                                              }}
                                             >
-                                              <Check className={cn("h-4 w-4")} />
-                                            </div>
-                                            <span>{tag}</span>
-                                          </CommandItem>
-                                        ))}
+                                              <div
+                                                className={cn(
+                                                  "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                                                  selectedTags.includes(tagName)
+                                                    ? "bg-primary text-primary-foreground"
+                                                    : "opacity-50 [&_svg]:invisible"
+                                                )}
+                                              >
+                                                <Check className={cn("h-4 w-4")} />
+                                              </div>
+                                              {TagIcon && <TagIcon className="mr-2 h-4 w-4 text-muted-foreground" />}
+                                              <span>{tagName}</span>
+                                            </CommandItem>
+                                          )
+                                        })}
                                       </CommandGroup>
                                     ))}
                                   </CommandList>
@@ -364,7 +391,7 @@ export default function CreateCharacterPage() {
                           <FormItem>
                               <FormLabel>คำอธิบาย * (ไม่แสดงผลบนหน้าตัวละคร เป็นข้อมูลให้ AI)</FormLabel>
                               <FormControl>
-                              <Textarea placeholder="e.g. ฉันเป็นนักฟิสิกส์ มีบุคลิกใจดี ชอบอธิบายแนวคิดซับซ้อนให้เข้าใจง่าย ฉันมีความสนใจในวิทยาศาสตร์ จักรวาล และดนตรีคลาสสิก" {...field} rows={6} maxLength={4096}/>
+                              <Textarea placeholder="e.g. ฉันเป็นนักฟิสิกส์ มีบุคลิกใจดี ชอบอธิบายแนวคิดซับซ้อนให้เข้าใจง่าย ฉันมีความสนใจในวิทยาศาสตร์ จักรวาล และดนตรีคลาสสิก" {...field} rows={6} maxLength={4096} className="focus:ring-primary focus:border-primary transition-all duration-300"/>
                               </FormControl>
                               <FormDescription className='flex justify-end'>{field.value.length}/4096</FormDescription>
                               <FormMessage />
@@ -379,7 +406,7 @@ export default function CreateCharacterPage() {
                           <FormItem>
                               <FormLabel>คำทักทาย *</FormLabel>
                               <FormControl>
-                              <Textarea placeholder="e.g. สวัสดี ฉันคืออัลเบิร์ต ถามฉันเกี่ยวกับผลงานทางวิทยาศาสตร์ของฉันได้เลย" {...field} rows={4} maxLength={2048}/>
+                              <Textarea placeholder="e.g. สวัสดี ฉันคืออัลเบิร์ต ถามฉันเกี่ยวกับผลงานทางวิทยาศาสตร์ของฉันได้เลย" {...field} rows={4} maxLength={2048} className="focus:ring-primary focus:border-primary transition-all duration-300"/>
                               </FormControl>
                               <FormDescription className='flex justify-end'>{field.value.length}/2048</FormDescription>
                               <FormMessage />
@@ -394,7 +421,7 @@ export default function CreateCharacterPage() {
                           <FormItem>
                               <FormLabel>ประวัติตัวละคร (สำหรับผู้ใช้ดูเท่านั้น ไม่ใช้เป็นข้อมูลให้ AI) (ไม่บังคับ)</FormLabel>
                               <FormControl>
-                              <Textarea placeholder="e.g. อัลเบิร์ตเกิดในเยอรมนีเมื่อปี 1879 ได้รับรางวัลโนเบลจากการค้นพบปรากฏการณ์โฟโตอิเล็กทริก" {...field} rows={6} maxLength={4096}/>
+                              <Textarea placeholder="e.g. อัลเบิร์ตเกิดในเยอรมนีเมื่อปี 1879 ได้รับรางวัลโนเบลจากการค้นพบปรากฏการณ์โฟโตอิเล็กทริก" {...field} rows={6} maxLength={4096} className="focus:ring-primary focus:border-primary transition-all duration-300"/>
                               </FormControl>
                               <FormDescription className='flex justify-end'>{field.value?.length || 0}/4096</FormDescription>
                               <FormMessage />
@@ -404,7 +431,7 @@ export default function CreateCharacterPage() {
                   </CardContent>
               </Card>
 
-              <Card>
+              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <CardHeader>
                       <CardTitle>การมองเห็น *</CardTitle>
                   </CardHeader>
@@ -448,10 +475,13 @@ export default function CreateCharacterPage() {
           </div>
            
             <div className="flex justify-end">
-                <Button type="submit" size="lg" className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white">สร้างตัวละคร</Button>
+                <Button type="submit" size="lg" className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-bold shadow-lg hover:scale-105 transition-transform">
+                  <Rocket className="mr-2"/>
+                  สร้างตัวละคร
+                </Button>
             </div>
              <p className="text-xs text-muted-foreground text-center">
-                โปรดตรวจสอบให้แน่ใจว่าตัวละครเป็นไปตาม <Link href="#" className="underline">ข้อกำหนดและเงื่อนไข</Link>
+                โปรดตรวจสอบให้แน่ใจว่าตัวละครเป็นไปตาม <Link href="#" className="underline hover:text-primary">ข้อกำหนดและเงื่อนไข</Link>
             </p>
         </form>
       </Form>

@@ -4,24 +4,8 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
-
-export const GenerateCharacterDetailsInputSchema = z.object({
-  prompt: z.string().describe('A prompt describing the character to generate.'),
-});
-export type GenerateCharacterDetailsInput = z.infer<
-  typeof GenerateCharacterDetailsInputSchema
->;
-
-export const GenerateCharacterDetailsOutputSchema = z.object({
-  name: z.string().describe("The character's name."),
-  tagline: z.string().describe("The character's tagline or a short introduction."),
-  personality: z.string().describe("A detailed description of the character's personality."),
-  greeting: z.string().describe("A greeting message from the character."),
-});
-export type GenerateCharacterDetailsOutput = z.infer<
-  typeof GenerateCharacterDetailsOutputSchema
->;
+import { GenerateCharacterDetailsInputSchema, GenerateCharacterDetailsOutputSchema } from '@/ai/schemas';
+import type { GenerateCharacterDetailsInput, GenerateCharacterDetailsOutput } from '@/ai/schemas';
 
 const generateCharacterPrompt = ai.definePrompt({
   name: 'generateCharacterPrompt',
