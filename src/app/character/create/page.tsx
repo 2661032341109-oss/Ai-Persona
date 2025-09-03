@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -49,6 +50,7 @@ import { generateCharacterDetails } from '@/ai/flows/generate-character-details'
 import { generateImage } from '@/ai/flows/generate-image';
 import { generateCharacterFromDraft } from '@/ai/flows/generate-character-from-draft';
 import type { GenerateCharacterDetailsInput, GenerateImageInput, GenerateCharacterFromDraftInput } from '@/ai/schemas';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const tagsConfig = {
   'ระดับเนื้อหา': [
