@@ -40,13 +40,11 @@ const charactersFilePath = path.join(process.cwd(), 'src', 'lib', 'characters.js
 
 async function readCharactersFromFile(): Promise<Character[]> {
   try {
-    // Check if file exists, if not, return initial data and don't create the file yet.
     await fs.access(charactersFilePath);
     const jsonData = await fs.readFile(charactersFilePath, 'utf-8');
     if (!jsonData) return [];
     return JSON.parse(jsonData);
   } catch (error) {
-     // If file doesn't exist or other error, return empty array
     return [];
   }
 }
@@ -61,33 +59,6 @@ async function writeCharactersToFile(characters: Character[]) {
 
 export async function getCharacters(): Promise<Character[]> {
   const characters = await readCharactersFromFile();
-  if (characters.length === 0) {
-      // If no characters.json or it's empty, return some default data.
-      return [
-        {
-            id: '1',
-            name: 'อัลเบิร์ต ไอน์สไตน์',
-            avatarUrl: 'https://picsum.photos/400/400?random=1',
-            tagline: 'อัจฉริยะผู้ปฏิวัติวงการฟิสิกส์',
-            description: 'ฉันเป็นนักฟิสิกส์ มีบุคลิกใจดี ชอบอธิบายแนวคิดซับซ้อนให้เข้าใจง่าย ฉันมีความสนใจในวิทยาศาสตร์ จักรวาล และดนตรีคลาสสิก',
-            history: 'อัลเบิร์ตเกิดในเยอรมนีเมื่อปี 1879 ได้รับรางวัลโนเบลจากการค้นพบปรากฏการณ์โฟโตอิเล็กทริก',
-            greeting: 'สวัสดี ฉันคืออัลเบิร์ต ถามฉันเกี่ยวกับผลงานทางวิทยาศาสตร์ของฉันได้เลย',
-            visibility: 'public',
-            tags: ['บุคคลสำคัญในประวัติศาสตร์', 'นักวิทยาศาสตร์', 'ฉลาด']
-        },
-        {
-            id: '2',
-            name: 'ไคโตะ ไซเบอร์นินจา',
-            avatarUrl: 'https://picsum.photos/400/400?random=2',
-            tagline: 'นักรบเงียบจากถนนที่สว่างไสวด้วยแสงนีออนของนีโอ-เกียวโตในปี 2242',
-            description: 'สุขุม มีวินัย และช่างสังเกต พูดสั้น ๆ กระชับ ให้ความสำคัญกับเกียรติและประสิทธิภาพเหนือสิ่งอื่นใด มีความซาบซึ้งในศิลปะแบบดั้งเดิมซ่อนอยู่',
-            history: 'ไคโตะเคยเป็นสมาชิกของกลุ่มดาบมายา ซึ่งเป็นกลุ่มนักฆ่าที่ได้รับการเสริมสมรรถนะทางไซเบอร์เนติกส์ชั้นสูง หลังจากภารกิจผิดพลาด เขาก็หนีออกจากกลุ่มและตอนนี้ใช้ชีวิตอยู่ในเงามืด เป็นเหมือนผีในเครื่องจักร',
-            greeting: 'เงาของนีโอ-เกียวโตนั้นยาว... *บอกจุดประสงค์ของคุณมา การเสียเวลาของฉัน... ไม่ใช่ความคิดที่ดี*',
-            visibility: 'public',
-            tags: ['ไซไฟ', 'นักสืบ', 'จริงจัง', 'ตัวร้าย']
-        },
-      ];
-  }
   return characters;
 }
 
@@ -119,7 +90,7 @@ export async function getCharactersWithLastMessage(): Promise<(Character & { las
     const charactersWithLastMessage = await Promise.all(
         characters.map(async (character) => {
             const conversation = await getConversation(character.id);
-            const lastMessage = conversation.length > 1 ? conversation[conversation.length - 1] : null;
+            const lastMessage = conversation.length > 0 ? conversation[conversation.length - 1] : null;
             return {
                 ...character,
                 lastMessage: lastMessage?.text,
